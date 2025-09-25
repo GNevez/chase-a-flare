@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+@config "../../tailwind.config.ts";
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 6%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 95%;
+
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 95%;
+
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 51 100% 50%;
+    --accent-foreground: 0 0% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --radius: 0.75rem;
+
+    /* Chase a Flare Brand Tokens */
+    --graphite: 0 0% 10%;
+    --graphite-light: 0 0% 15%;
+    --graphite-lighter: 0 0% 20%;
+    --neon-yellow: 51 100% 50%;
+    --neon-yellow-dark: 45 95% 45%;
+    --neon-glow: 51 100% 50%;
+
+    /* Premium Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--graphite)), hsl(var(--graphite-light)));
+    --gradient-accent: linear-gradient(135deg, hsl(var(--neon-yellow)), hsl(var(--neon-yellow-dark)));
+    --gradient-card: linear-gradient(145deg, hsl(var(--graphite)), hsl(var(--graphite-light)));
+
+    /* Premium Shadows & Effects */
+    --shadow-premium: 0 25px 50px -12px hsl(var(--graphite) / 0.8);
+    --shadow-card: 0 10px 25px -5px hsl(var(--graphite) / 0.4);
+    --glow-yellow: 0 0 30px hsl(var(--neon-yellow) / 0.5);
+    --glow-yellow-intense: 0 0 40px hsl(var(--neon-yellow) / 0.8);
+
+    /* Smooth Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  /* Light mode for Chase a Flare (when needed) */
+  .light {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 0 0% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 90%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 51 100% 50%;
+    --accent-foreground: 0 0% 10%;
+  }
+
+  html {
+  scroll-behavior: smooth;
+  }
+
+}
+
+@layer components {
+  /* Chase a Flare Custom Components */
+  .hero-gradient {
+    background: var(--gradient-hero);
+  }
+
+  .accent-gradient {
+    background: var(--gradient-accent);
+  }
+
+  .card-gradient {
+    background: var(--gradient-card);
+  }
+
+  .glow-yellow {
+    box-shadow: var(--glow-yellow);
+  }
+
+  .glow-yellow-intense {
+    box-shadow: var(--glow-yellow-intense);
+  }
+
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  .navbar-glass {
+    backdrop-filter: blur(20px);
+    background: hsl(var(--background) / 0.8);
+    border-bottom: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  body {
+    background: hsl(var(--background));
+    color: hsl(var(--foreground)); 
+    overflow-x: hidden;
+
+  }
+
+  .premium-card {
+    background: var(--gradient-card);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+
+  .premium-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-premium);
+  }
+
+  .premium-card:hover .card-video {
+    transform: scale(1.05);
+  }
+
+  .hover-glow:hover {
+    box-shadow: var(--glow-yellow);
+    border-color: hsl(var(--neon-yellow));
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;  
+    scrollbar-width: none;  
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  
+  }
+
+  .snap-x {
+    scroll-snap-type: x mandatory;
+  }
+
+  .snap-center {
+    scroll-snap-align: center;
+  }
+
+  .snap-mandatory {
+    scroll-snap-type: x mandatory;
+  }
+}
