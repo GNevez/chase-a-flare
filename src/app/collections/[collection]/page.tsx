@@ -6,7 +6,7 @@ import bannerImage from "@/assets/glasses-banner.jpg"; // Certifique-se que o ca
 import Image from "next/image";
 import tst from "@/assets/tst.png";
 
-import ProductList from "../components/productList";
+import ProductList from "../../../components/collection/productList";
 
 import {
   Product,
@@ -14,71 +14,16 @@ import {
   PropsProductsList,
 } from "@/interface/collection/products";
 
+import categoriesData from "@/hooks/temp-data/categories.json";
+import productsData from "@/hooks/temp-data/products.json";
+
 const Collection = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [gridColumns, setGridColumns] = useState<GridColumns>(3);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 250]);
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
 
-  const products: Product[] = [
-    {
-      id: 1,
-      name: "Óculos Avel - Sol",
-      price: 181.3,
-      originalPrice: 259.0,
-      image: tst,
-      colors: ["marrom", "azul"],
-      category: "Solar",
-      isSale: true,
-    },
-    {
-      id: 2,
-      name: "Óculos Onus - Sol (Polarizado)",
-      price: 239.2,
-      originalPrice: 299.0,
-      image: "https://placehold.co/400x400/E2E8F0/A0AEC0?text=Óculos",
-      colors: ["preto", "cinza"],
-      category: "Solar",
-      isSale: true,
-    },
-    {
-      id: 3,
-      name: "Óculos Otto - Sol",
-      price: 181.3,
-      originalPrice: 259.0,
-      image: "https://placehold.co/400x400/E2E8F0/A0AEC0?text=Óculos",
-      colors: ["marrom", "azul"],
-      category: "Solar",
-      isSale: true,
-    },
-    {
-      id: 4,
-      name: "Designer Collection",
-      price: 210,
-      image: "https://placehold.co/400x400/E2E8F0/A0AEC0?text=Óculos",
-      colors: ["dourado", "prata", "rose"],
-      category: "Premium",
-      isNew: true,
-    },
-    {
-      id: 5,
-      name: "Vintage Style",
-      price: 195,
-      originalPrice: 250,
-      image: "https://placehold.co/400x400/E2E8F0/A0AEC0?text=Óculos",
-      colors: ["marrom", "dourado", "verde"],
-      category: "Vintage",
-      isSale: true,
-    },
-    {
-      id: 6,
-      name: "Modern Frame",
-      price: 245,
-      image: "https://placehold.co/400x400/E2E8F0/A0AEC0?text=Óculos",
-      colors: ["preto", "cinza", "azul"],
-      category: "Moderno",
-    },
-  ];
+  const products: Product[] = productsData;
 
   const colors = [
     { name: "bege", value: "bg-yellow-100" },
@@ -129,9 +74,7 @@ const Collection = () => {
     );
   };
 
-  const calculateDiscount = (original: number, sale: number) => {
-    return Math.round(((original - sale) / original) * 100);
-  };
+  
 
   const propsProductsList: PropsProductsList = {
     setPriceRange,
@@ -145,7 +88,6 @@ const Collection = () => {
     setGridColumns,
     getGridClass,
     filteredProducts,
-    calculateDiscount,
   };
 
   return (

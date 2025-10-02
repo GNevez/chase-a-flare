@@ -5,13 +5,17 @@ import { Button } from '@/components/ui/button';
 import caflong from "@/assets/CAFLongBranco.png";
 import Image from 'next/image';
 import Link from "next/link";
+import { usePathname } from 'next/navigation';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
+  const currUrl = usePathname();
+
   useEffect(() => {
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -41,7 +45,11 @@ const Navbar = () => {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-smooth ${
-          isScrolled || isMobileMenuOpen ? "navbar-glass" : "bg-transparent"
+          currUrl === "/"
+            ? isScrolled || isMobileMenuOpen
+              ? "navbar-glass"
+              : "bg-transparent"
+            : "navbar-glass"
         }`}
       >
         <div className="container mx-auto px-4 md:px-6 py-3 md:py-4">

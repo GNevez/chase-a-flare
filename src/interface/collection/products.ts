@@ -6,17 +6,24 @@ interface Product {
   price: number;
   originalPrice?: number;
   image: string | StaticImageData;
+  imageHover?: string | StaticImageData;
+  installments?: string;
   colors: string[];
-  category: string;
+  category: number;
   isNew?: boolean;
   isSale?: boolean;
 }
 
 type GridColumns = 2 | 3 | 4;
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 interface ColorOption {
   name: string;
-  value: string; // classe tailwind, ex: "bg-blue-500"
+  value: string;
 }
 
 interface PropsProductsList {
@@ -31,7 +38,6 @@ interface PropsProductsList {
   setGridColumns: React.Dispatch<React.SetStateAction<GridColumns>>;
   getGridClass: () => string;
   filteredProducts: Product[];
-  calculateDiscount: (original: number, sale: number) => number;
 }
 
-export type { Product, GridColumns, ColorOption, PropsProductsList };
+export type { Product, GridColumns, ColorOption, PropsProductsList, Category };

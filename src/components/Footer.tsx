@@ -10,6 +10,7 @@ import {
   MapPin,
 } from "lucide-react";
 import caflong from "../assets/CAFLongBranco.png";
+import Image from "next/image";
 
 const Footer = () => {
   return (
@@ -43,7 +44,7 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-start justify-start">
-              <img src={caflong} alt="Chase a Flare" className="h-28 w-auto" />
+              <Image src={caflong} alt="Chase a Flare" className="h-28 w-auto" />
             </div>
             <p className="text-primary-foreground/80 text-sm">
               Your trusted partner for premium eyewear. Quality frames, expert

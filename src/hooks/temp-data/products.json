@@ -1,0 +1,157 @@
+[
+  {
+    "id": 1,
+    "name": "Óculos de Sol Gatinho - Preto",
+    "price": 229.9,
+    "originalPrice": 289.9,
+    "image": "https://chillibeans.vteximg.com.br/arquivos/ids/531651-1000-1000/LV.MT.0803-0202.-Armacao-Para-Oculos-de-Grau-Masculino-Classico-Metal-Marrom.jpg",
+    "imageHover": "https://occhialeria.com.br/wp-content/uploads/2022/07/01-11.jpg",
+    "colors": ["#000000", "#A52A2A"],
+    "category": 1,
+    "isSale": true
+  },
+  {
+    "id": 2,
+    "name": "Óculos de Sol Aviador - Dourado",
+    "price": 349.9,
+    "originalPrice": 449.9,
+    "image": "https://cdn.awsli.com.br/600x700/919/919087/produto/303480926/6335-0j0ljjtpd0.png",
+    "imageHover": "https://img.ltwebstatic.com/images3_pi/2022/04/14/1649917537e51c8651f887556fbd8a0a99cb9e9009_thumbnail_900x.webp",
+    "colors": ["#FFD700", "#C0C0C0"],
+    "category": 1,
+    "isSale": true
+  },
+  {
+    "id": 3,
+    "name": "Óculos de Grau Redondo - Tartaruga",
+    "price": 189.9,
+    "image": "https://chillibeans.vteximg.com.br/arquivos/ids/531651-1000-1000/LV.MT.0803-0202.-Armacao-Para-Oculos-de-Grau-Masculino-Classico-Metal-Marrom.jpg",
+    "imageHover": "https://blog.livo.com.br/wp-content/uploads/2021/11/como-escolher-oculos-sol-LIVO_John.jpg",
+    "colors": ["#5C4033", "#000000"],
+    "category": 2,
+    "isNew": true
+  },
+  {
+    "id": 4,
+    "name": "Óculos de Sol Quadrado - Marrom",
+    "price": 279.9,
+    "image": "https://images.tcdn.com.br/img/img_prod/747002/oculos_de_sol_vintage_unissex_hoshwear_preto_1011_2_3abe42b10a69dfeccf2fa1113f9ce3f0.jpg",
+    "imageHover": "https://www.fanaticas.com.br/image/cache/wp/gj/product-771/XDhMu80dZi-IMG_1887-1200x1200-product_popup.webp",
+    "colors": ["#8B4513", "#000000"],
+    "category": 1,
+    "isNew": false
+  },
+  {
+    "id": 5,
+    "name": "Óculos de Grau Gatinho - Rosê",
+    "price": 219.9,
+    "originalPrice": 279.9,
+    "image": "https://d3ugyf2ht6aenh.cloudfront.net/stores/885/051/products/k-ota-780-31-01b44eb0b15174092b16892523291583-1024-1024.webp",
+    "imageHover": "https://occhialeria.com.br/wp-content/uploads/2022/07/1-11.jpg",
+    "colors": ["#FFC0CB", "#D3D3D3"],
+    "category": 2,
+    "isSale": true
+  },
+  {
+    "id": 6,
+    "name": "Óculos de Sol Wayfarer - Preto Fosco",
+    "price": 259.9,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_909995-MLB51479830588_092022-O.webp",
+    "imageHover": "https://www.sirrose.com/wp-content/uploads/2022/07/homem-usando-oculos-de-sol-wayfarer-preto-classico-polarizado-SIR-ROSE.jpg",
+    "colors": ["#000000", "#1C1C1C"],
+    "category": 1,
+    "isNew": false
+  },
+  {
+    "id": 7,
+    "name": "Óculos de Grau Quadrado - Transparente",
+    "price": 199.9,
+    "image": "https://d3ugyf2ht6aenh.cloudfront.net/stores/001/959/379/products/011-2096-512-oculos-de-grau-quadrado-transparente-haste-dourada-frente1-15f1236814237d1d2316518716503929-1024-1024.jpg",
+    "imageHover": "https://cdn.awsli.com.br/600x450/474/474271/produto/207036611/screenshot_20230225-121631_instagram.jpg",
+    "colors": ["#FFFFFF", "#F0F8FF"],
+    "category": 2,
+    "isNew": true
+  },
+  {
+    "id": 8,
+    "name": "Óculos de Sol Esportivo - Laranja Espelhado",
+    "price": 399.9,
+    "image": "https://http2.mlstatic.com/D_NQ_NP_948625-MLB49863412353_052022-O.webp",
+    "imageHover": "https://blog.loopinfinito.com.br/wp-content/uploads/2020/02/cinco-modelos-de-oculos-para-pedalar-em-2020-destaque.jpg",
+    "colors": ["#FFA500", "#000000"],
+    "category": 3,
+    "isNew": false
+  },
+  {
+    "id": 9,
+    "name": "Óculos de Grau Clubmaster - Preto e Prata",
+    "price": 289.9,
+    "image": "https://images.tcdn.com.br/img/img_prod/695955/armacao_de_oculos_masculino_clubmaster_preto_e_prata_acetato_e_metal_971_1_4193498835821c9775f0a3e87834c892.jpg",
+    "imageHover": "https://cdn.awsli.com.br/600x450/1908/1908304/produto/217988349/frame-2-2--1--a6c47bfb.jpg",
+    "colors": ["#000000", "#C0C0C0"],
+    "category": 2,
+    "isNew": false
+  },
+  {
+    "id": 10,
+    "name": "Óculos de Sol Hexagonal - Rosê",
+    "price": 239.9,
+    "originalPrice": 299.9,
+    "image": "https://d3ugyf2ht6aenh.cloudfront.net/stores/001/959/379/products/011-1970-438-oculos-hexagonal-rose-lente-marrom-degrade-frente1-cce8af450d0325f57316518714073841-1024-1024.jpg",
+    "imageHover": "https://www.eotica.com.br/blog/wp-content/uploads/2023/07/o-que-e-oculos-hexagonal-e-quais-os-melhores-modelos-para-usar-no-dia-a-dia-eotica.jpg",
+    "colors": ["#FFC0CB", "#FFD700"],
+    "category": 1,
+    "isSale": true
+  },
+  {
+    "id": 11,
+    "name": "Óculos de Grau Retangular - Azul Marinho",
+    "price": 179.9,
+    "image": "https://images.tcdn.com.br/img/img_prod/695955/armacao_de_oculos_masculino_retangular_azul_marinho_1057_1_c889f812543d31b816027a0083e404b0.jpg",
+    "imageHover": "https://http2.mlstatic.com/D_NQ_NP_918511-MLB48805322986_012022-O.jpg",
+    "colors": ["#000080", "#000000"],
+    "category": 2,
+    "isNew": false
+  },
+  {
+    "id": 12,
+    "name": "Óculos de Sol Oversized - Caramelo",
+    "price": 319.9,
+    "image": "https://cdn.awsli.com.br/2500x2500/228/228771/produto/212686034/captura-de-tela-2023-04-12-181519.jpg",
+    "imageHover": "https://i.pinimg.com/736x/88/54/47/88544773d5f1345f8cc053a484f932f6.jpg",
+    "colors": ["#D2691E", "#000000"],
+    "category": 1,
+    "isNew": true
+  },
+  {
+    "id": 13,
+    "name": "Óculos de Grau Fio de Nylon - Grafite",
+    "price": 249.9,
+    "image": "https://images.tcdn.com.br/img/img_prod/695955/armacao_de_oculos_masculino_fio_de_nylon_metal_grafite_1015_1_21128ddb35c05e11d612e566d5fe0386.jpg",
+    "imageHover": "https://www.voluntariosdosertao.org/wp-content/uploads/2023/01/homem-com-oculos-de-grau-fio-de-nylon-sorrindo.jpg",
+    "colors": ["#36454F", "#C0C0C0"],
+    "category": 2,
+    "isNew": false
+  },
+  {
+    "id": 14,
+    "name": "Óculos de Sol Retrô - Vermelho",
+    "price": 199.9,
+    "originalPrice": 249.9,
+    "image": "https://cdn.awsli.com.br/600x450/474/474271/produto/29168015/01f163152c.jpg",
+    "imageHover": "https://i.pinimg.com/550x/a4/09/a4/a409a471a525e9beca2a50a1b65902e1.jpg",
+    "colors": ["#FF0000", "#FFFFFF"],
+    "category": 1,
+    "isSale": true
+  },
+  {
+    "id": 15,
+    "name": "Óculos de Grau Infantil - Rosa",
+    "price": 149.9,
+    "image": "https://cdn.awsli.com.br/600x450/1908/1908304/produto/209995874/armacao-de-oculos-infantil-rosa-gatinho-laco-menina-flexivel-0504-2.jpg",
+    "imageHover": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_Dq3bC-oWvG805uHh-5L8vJ9WqXqB0g9eA&s",
+    "colors": ["#FFC0CB", "#FFFFFF"],
+    "category": 4,
+    "isNew": true
+  }
+]

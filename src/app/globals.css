@@ -53,6 +53,8 @@
     --background: 0 0% 6%;
     --foreground: 0 0% 98%;
 
+    --removed-body-scroll-bar-size: 0px !important;
+
     --card: 0 0% 8%;
     --card-foreground: 0 0% 95%;
 
@@ -225,4 +227,6 @@
   .snap-mandatory {
     scroll-snap-type: x mandatory;
   }
+
+ 
 }
