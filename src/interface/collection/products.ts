@@ -12,6 +12,7 @@ interface Product {
   category: number;
   isNew?: boolean;
   isSale?: boolean;
+  slug?: string;
 }
 
 type GridColumns = 2 | 3 | 4;

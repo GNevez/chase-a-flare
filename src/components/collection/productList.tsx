@@ -34,7 +34,6 @@ const ProductList: React.FC<PropsProductsList> = ({
 }) => {
   const [sortBy, setSortBy] = useState("featured");
 
-  // Classe padrão para inputs modernos
   const modernInput =
     "w-full rounded-xl bg-gray-100 px-4 py-2 shadow-sm focus:bg-white focus:shadow-md transition-all outline-none border-none";
 
@@ -100,10 +99,8 @@ const ProductList: React.FC<PropsProductsList> = ({
           </div>
         </aside>
 
-        {/* Produtos */}
         <main className="w-full md:w-3/4 lg:w-4/5">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            {/* Search moderno */}
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <Input
@@ -154,7 +151,6 @@ const ProductList: React.FC<PropsProductsList> = ({
             </div>
           </div>
 
-          {/* Grid Produtos */}
           <div className={`grid gap-6 ${getGridClass()}`}>
             {filteredProducts.map((product) => (
               <ProductCard

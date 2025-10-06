@@ -8,7 +8,8 @@
     "imageHover": "https://occhialeria.com.br/wp-content/uploads/2022/07/01-11.jpg",
     "colors": ["#000000", "#A52A2A"],
     "category": 1,
-    "isSale": true
+    "isSale": true,
+    "slug": "oculos-sol-gatinho"
   },
   {
     "id": 2,
@@ -19,7 +20,8 @@
     "imageHover": "https://img.ltwebstatic.com/images3_pi/2022/04/14/1649917537e51c8651f887556fbd8a0a99cb9e9009_thumbnail_900x.webp",
     "colors": ["#FFD700", "#C0C0C0"],
     "category": 1,
-    "isSale": true
+    "isSale": true,
+    "slug": "oculos-sol-aviador"
   },
   {
     "id": 3,
@@ -29,7 +31,8 @@
     "imageHover": "https://blog.livo.com.br/wp-content/uploads/2021/11/como-escolher-oculos-sol-LIVO_John.jpg",
     "colors": ["#5C4033", "#000000"],
     "category": 2,
-    "isNew": true
+    "isNew": true,
+    "slug": "oculos-grau-redondo"
   },
   {
     "id": 4,
@@ -39,7 +42,8 @@
     "imageHover": "https://www.fanaticas.com.br/image/cache/wp/gj/product-771/XDhMu80dZi-IMG_1887-1200x1200-product_popup.webp",
     "colors": ["#8B4513", "#000000"],
     "category": 1,
-    "isNew": false
+    "isNew": false,
+    "slug": "oculos-sol-quadrado"
   },
   {
     "id": 5,
@@ -50,7 +54,8 @@
     "imageHover": "https://occhialeria.com.br/wp-content/uploads/2022/07/1-11.jpg",
     "colors": ["#FFC0CB", "#D3D3D3"],
     "category": 2,
-    "isSale": true
+    "isSale": true,
+    "slug": "oculos-grau-gatinho"
   },
   {
     "id": 6,

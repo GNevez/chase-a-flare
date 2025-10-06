@@ -1,6 +1,32 @@
 "use client";
 import React from "react";
 import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+
+const imageZoomVariants: any = {
+  hidden: { opacity: 0.8, scale: 1.1 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: [0.25, 0.46, 0.45, 0.94],
+    },
+  },
+};
+
+const textFadeVariants: any = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.2,
+      ease: "easeOut",
+      delay: 0.5,
+    },
+  },
+};
 
 export const BannerSection: React.FC = () => {
   return (
@@ -8,14 +34,24 @@ export const BannerSection: React.FC = () => {
       <div className="container mx-auto px-4">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-gray-800 to-black">
           <div className="absolute inset-0">
-            <img
+            <motion.img
               src="https://images.pexels.com/photos/701877/pexels-photo-701877.jpeg?auto=compress&cs=tinysrgb&w=1200"
               alt="Óculos de qualidade premium"
               className="w-full h-full object-cover opacity-30"
+              variants={imageZoomVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.5 }}
             />
           </div>
 
-          <div className="relative z-10 px-8 py-16 md:px-16 md:py-24">
+          <motion.div
+            className="relative z-10 px-8 py-16 md:px-16 md:py-24"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.5 }}
+            variants={textFadeVariants} // Aplicando a variante de fade para o texto
+          >
             <div className="max-w-2xl">
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
                 Proteção e<span className="text-yellow-400"> Estilo</span>
@@ -60,7 +96,7 @@ export const BannerSection: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

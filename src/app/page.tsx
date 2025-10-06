@@ -5,6 +5,7 @@ import { PromoBar } from "@/components/PromoBar";
 import { LifestyleShowcase } from "@/components/LifestyleShowcase";
 import { BannerSection } from "@/components/BannerSection";
 import NewCollection from "@/components/newCollection";
+import InfoSection from "@/components/InfoSection";
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
         <NewCollection />
         <LifestyleShowcase />
         <BannerSection />
+        <InfoSection />
       </main>
     </div>
   );

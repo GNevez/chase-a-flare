@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { LifestyleCard } from "./LifestyleCard";
+import { motion } from "framer-motion"; 
 
 export const LifestyleShowcase: React.FC = () => {
   const products = [
@@ -41,23 +42,56 @@ export const LifestyleShowcase: React.FC = () => {
     },
   ];
 
+  // 2. Definir as variantes da animação para os cards
+  const cardVariants: any = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.15, // Delay em cascata
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    }),
+  };
+
   return (
     <div className="bg-white py-16">
       <div className="container mx-auto px-4">
         {/* Desktop Grid */}
         <div className="hidden md:grid md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {products.map((product) => (
-            <LifestyleCard key={product.id} {...product} />
+          {products.map((product, index) => (
+            // 3. Aplicar a animação no wrapper do card
+            <motion.div
+              key={product.id}
+              custom={index}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.3 }}
+            >
+              <LifestyleCard {...product} />
+            </motion.div>
           ))}
         </div>
 
         {/* Mobile Carousel */}
         <div className="md:hidden">
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 snap-x snap-mandatory">
-            {products.map((product) => (
-              <div key={product.id} className="flex-none w-48 snap-center">
+            {products.map((product, index) => (
+              // 4. Aplicar a mesma animação no wrapper do carrossel
+              <motion.div
+                key={product.id}
+                className="flex-none w-48 snap-center"
+                custom={index}
+                variants={cardVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.5 }}
+              >
                 <LifestyleCard {...product} />
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

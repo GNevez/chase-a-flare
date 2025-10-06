@@ -14,7 +14,7 @@ import Image from "next/image";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground border-t-2 border-yellow">
+    <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4">
         {/* Newsletter */}
         <div className="py-12 border-b border-primary-foreground/20">
@@ -44,7 +44,11 @@ const Footer = () => {
           {/* Company Info */}
           <div className="space-y-4">
             <div className="flex items-start justify-start">
-              <Image src={caflong} alt="Chase a Flare" className="h-28 w-auto" />
+              <Image
+                src={caflong}
+                alt="Chase a Flare"
+                className="h-28 w-auto"
+              />
             </div>
             <p className="text-primary-foreground/80 text-sm">
               Your trusted partner for premium eyewear. Quality frames, expert

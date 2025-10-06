@@ -6,6 +6,8 @@ import caflong from "@/assets/CAFLongBranco.png";
 import Image from 'next/image';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
+import { Cart } from "./cart/cart";
+import { SearchPopover } from "./searchBtn/searchBtn";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -15,7 +17,6 @@ const Navbar = () => {
   const currUrl = usePathname();
 
   useEffect(() => {
-
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
@@ -40,6 +41,8 @@ const Navbar = () => {
     { name: "Classic", href: "#classic" },
     { name: "Rastreio", href: "#rastreio" },
   ];
+
+  
 
   return (
     <>
@@ -103,19 +106,13 @@ const Navbar = () => {
 
             {/* Desktop Icons */}
             <div className="hidden md:flex items-center space-x-4">
-              <Button variant="ghost" size="icon" className="hover-glow">
-                <Search className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hover-glow relative"
-              >
-                <ShoppingCart className="h-5 w-5" />
-                <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                  0
-                </span>
-              </Button>
+              <div className="relative">
+                <SearchPopover />
+              </div>
+
+              <div className="relative">
+                <Cart />
+              </div>
             </div>
 
             {/* Mobile Layout */}

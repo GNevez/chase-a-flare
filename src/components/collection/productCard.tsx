@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
 import { Product } from "@/interface/collection/products";
+import Link from "next/link";
 
 interface ProductCardProps {
   product: Product;
@@ -23,9 +24,10 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <div
+    <Link
       key={product.id}
-      className="group relative rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 cursor-pointer"
+      className="group relative rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-500 cursor-pointer"
+      href={`/product/${product.slug}`}
     >
       {/* Imagem com hover */}
       <div className="relative w-full h-80">
@@ -70,6 +72,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };

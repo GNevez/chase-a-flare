@@ -16,6 +16,7 @@ import {
 
 import categoriesData from "@/hooks/temp-data/categories.json";
 import productsData from "@/hooks/temp-data/products.json";
+import { PromoBar } from "@/components/PromoBar";
 
 const Collection = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -110,6 +111,7 @@ const Collection = () => {
           </div>
         </div>
       </div>
+      <PromoBar />
       <ProductList {...propsProductsList} />
     </div>
   );

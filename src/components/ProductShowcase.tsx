@@ -7,6 +7,7 @@ import { Product, Category } from "@/interface/collection/products";
 
 import productsData from "@/hooks/temp-data/products.json";
 import categoriesData from "@/hooks/temp-data/categories.json";
+import { motion } from "framer-motion";
 
 export const ProductShowcase: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,6 +35,19 @@ export const ProductShowcase: React.FC = () => {
   const handleCategoryChange = (categoryIndex: number) => {
     setActiveCategory(categoryIndex);
     setCurrentIndex(0);
+  };
+
+  const cardVariants: any = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i: number) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.15,
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    }),
   };
 
   return (
@@ -85,10 +99,18 @@ export const ProductShowcase: React.FC = () => {
                 }%)`,
               }}
             >
-              {filteredProducts.map((product) => (
-                <div key={product.id} className="flex-none w-64">
+              {filteredProducts.map((product, index) => (
+                <motion.div
+                  key={product.id}
+                  className="flex-none w-64"
+                  custom={index}
+                  variants={cardVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.5 }}
+                >
                   <ProductCard product={product} key={product.id} />
-                </div>
+                </motion.div>
               ))}
             </div>
           </div>
