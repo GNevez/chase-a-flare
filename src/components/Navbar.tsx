@@ -6,7 +6,7 @@ import caflong from "@/assets/CAFLongBranco.png";
 import Image from 'next/image';
 import Link from "next/link";
 import { usePathname } from 'next/navigation';
-import { Cart } from "./cart/cart";
+import { Cart } from "./sideCart/cart";
 import { SearchPopover } from "./searchBtn/searchBtn";
 
 const Navbar = () => {
@@ -141,19 +141,8 @@ const Navbar = () => {
 
               {/* Mobile Icons */}
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="icon" className="hover-glow">
-                  <Search className="h-5 w-5" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="hover-glow relative"
-                >
-                  <ShoppingCart className="h-5 w-5" />
-                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-semibold">
-                    0
-                  </span>
-                </Button>
+                <SearchPopover />
+                <Cart />
               </div>
             </div>
           </div>
