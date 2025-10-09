@@ -1,4 +1,3 @@
-// @/components/checkout/FormSection.tsx
 import React from "react";
 
 type FormSectionProps = {

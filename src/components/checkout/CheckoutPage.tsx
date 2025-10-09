@@ -1,4 +1,3 @@
-// @/components/checkout/CheckoutPage.tsx
 "use client";
 
 import { FormSection } from "./FormSection";
@@ -9,7 +8,6 @@ import Link from "next/link";
 import { FormSelect } from "./FormSelect";
 import { QrCode } from "lucide-react";
 
-// Dados de exemplo que viriam do carrinho/contexto
 const orderItems = [
   {
     id: 1,
@@ -44,14 +42,12 @@ export function CheckoutPage() {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const shipping = 10.0; // Exemplo estático
+  const shipping = 10.0; 
   const total = subtotal + shipping;
 
   return (
-    // TEMA BRANCO FORÇADO e PADDING APLICADO CONFORME SOLICITADO
     <div className="bg-white font-display text-primary pt-24">
       <main className="container mx-auto px-4 lg:px-8 flex-grow grid grid-cols-1 lg:grid-cols-3 gap-16 pt-24">
-        {/* Coluna Principal: Formulários */}
         <div className="lg:col-span-2 pb-12">
           <div className="mb-8">
             <nav className="text-sm font-light text-neutral-500">
@@ -67,7 +63,6 @@ export function CheckoutPage() {
           </div>
 
           <div className="space-y-12">
-            {/* Seção 1: Identificação */}
             <FormSection title="Identificação" step={1}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
@@ -99,7 +94,6 @@ export function CheckoutPage() {
 
             <div className="border-t border-primary/20"></div>
 
-            {/* Seção 2: Entrega */}
             <FormSection title="Entrega" step={2}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormInput
@@ -125,11 +119,8 @@ export function CheckoutPage() {
 
             <div className="border-t border-primary/20"></div>
 
-            {/* Seção 3: Pagamento */}
-            {/* --- SEÇÃO DE PAGAMENTO MODIFICADA --- */}
             <FormSection title="Pagamento" step={3}>
               <div className="flex flex-wrap gap-3 mb-6">
-                {/* Opção "Boleto" foi removida do array */}
                 {["cartao_de_credito", "pix"].map((method) => (
                   <label
                     key={method}
@@ -150,7 +141,6 @@ export function CheckoutPage() {
                 ))}
               </div>
 
-              {/* Formulário do Cartão de Crédito ATUALIZADO */}
               {paymentMethod === "cartao_de_credito" && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormInput
@@ -180,7 +170,6 @@ export function CheckoutPage() {
                 </div>
               )}
 
-              {/* Card de Mensagem para o PIX */}
               {paymentMethod === "pix" && (
                 <div className="flex items-center gap-4 rounded-lg border-2 border-accent bg-accent/10 p-4 transition-all">
                   <QrCode className="h-8 w-8 text-primary" />
@@ -194,7 +183,6 @@ export function CheckoutPage() {
           </div>
         </div >
 
-        {/* Coluna Lateral: Resumo do Pedido */}
         <div className="lg:col-span-1">
           <OrderSummary
             items={orderItems}

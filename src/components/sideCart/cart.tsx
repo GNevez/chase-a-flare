@@ -19,8 +19,8 @@ import recommendedProducts from "@/hooks/temp-data/recommendedProducts.json";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "800"], // '300' é o peso 'light'
-  variable: "--font-plus-jakarta-sans", // Cria uma variável CSS para usar no Tailwind
+  weight: ["300", "400", "500", "700", "800"], 
+  variable: "--font-plus-jakarta-sans", 
 });
 
 export function Cart() {
@@ -64,7 +64,6 @@ export function Cart() {
         </Button>
       </SheetTrigger>
 
-      {/* LARGURA AUMENTADA AQUI */}
       <SheetContent
         className={
           plusJakartaSans.variable +

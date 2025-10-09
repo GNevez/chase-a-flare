@@ -1,4 +1,3 @@
-// @/components/checkout/FormInput.tsx
 type FormInputProps = {
   label: string;
   name: string;

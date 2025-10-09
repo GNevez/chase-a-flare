@@ -16,7 +16,6 @@ const montserrat = Montserrat({ subsets: ["latin"], weight: ["400"] });
 
 
 const CollectionsPage = () => {
-  // Coleções fixas
   const fixedCollections: Collection[] = [
     {
       id: 1,
@@ -41,7 +40,6 @@ const CollectionsPage = () => {
     },
   ];
 
-  // Mock para coleções futuras
   const dynamicCollections: Collection[] = [
     {
       id: 4,
@@ -96,7 +94,6 @@ const CollectionsPage = () => {
             key={collection.id}
             className="relative group rounded-2xl overflow-hidden shadow-lg cursor-pointer"
           >
-            {/* Imagem */}
             <Image
               src={collection.image}
               alt={collection.name}
@@ -105,7 +102,6 @@ const CollectionsPage = () => {
               className="object-cover w-full h-60 transition-transform duration-500 group-hover:scale-105"
             />
 
-            {/* Label fixa embaixo */}
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/30">
               <h3 className="text-lg font-semibold text-white text-center">
                 {collection.name}

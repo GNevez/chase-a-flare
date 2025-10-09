@@ -1,4 +1,3 @@
-// components/SearchPopover.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,7 +15,6 @@ import { useDebounce } from "@/hooks/useDebounce";
 import oculos1 from "@/assets/glasses-1.jpg";
 import oculos2 from "@/assets/glasses-2.jpg";
 
-// --- Simulação da sua API e dados (com mais produtos para testar) ---
 interface Product {
   id: string;
   name: string;
@@ -90,7 +88,6 @@ const searchProducts = async (query: string): Promise<Product[]> => {
     product.name.toLowerCase().includes(lowerCaseQuery)
   );
 };
-// --- Fim da simulação ---
 
 export function SearchPopover() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -130,7 +127,6 @@ export function SearchPopover() {
         sideOffset={8}
       >
         <div className="flex w-full items-center gap-2">
-          {/* O input e o botão de busca continuam iguais */}
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -138,11 +134,7 @@ export function SearchPopover() {
             className={modernInputStyle}
           />
         </div>
-
-        {/* CORREÇÃO APLICADA AQUI:
-          - Removemos a div interna com `h-full`.
-          - A div principal agora tem `overflow-y-auto` em vez de `overflow-hidden`.
-        */}
+        
         <div
           className={`
             transition-all duration-300 ease-in-out 
