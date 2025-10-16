@@ -14,7 +14,11 @@ export function ProductCard({ product }: ProductCardProps) {
           style={{ backgroundImage: `url("${product.image}")` }}
         />
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+<<<<<<< Updated upstream
         {/* Botão corrigido para a DIREITA */}
+=======
+        {/* BotÃ£o corrigido para a DIREITA */}
+>>>>>>> Stashed changes
         <button className="cursor-pointer absolute gap-1 bottom-4 right-4 flex h-10 py-6 px-4 items-center justify-center bg-white/70 text-primary text-sm font-normal rounded-full opacity-95 hover:opacity-100 transition-all duration-300 scale-95 hover:scale-100">
           <Plus className="w-4 h-4" />
           <ShoppingCart className="w-4 h-4" />
@@ -59,4 +63,8 @@ export function ProductCard({ product }: ProductCardProps) {
       </div>
     </div>
   );
+<<<<<<< Updated upstream
 }
+=======
+}
+>>>>>>> Stashed changes

@@ -237,5 +237,8 @@
   scrollbar-width: none;  
 }
 
+.aspect-9-16 {
+  padding-bottom: 177.77%; /* (16 / 9) * 100% */
+}
  
 }
