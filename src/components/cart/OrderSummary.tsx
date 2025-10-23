@@ -5,6 +5,8 @@ import { Button } from "../ui/button";
 type OrderSummaryProps = {
   subtotal: number;
   discount: number;
+  couponDiscount: number;
+  couponCode: string | undefined;
   shipping: string;
   total: number;
 };
@@ -12,6 +14,8 @@ type OrderSummaryProps = {
 export function OrderSummary({
   subtotal,
   discount,
+  couponDiscount,
+  couponCode,
   shipping,
   total,
 }: OrderSummaryProps) {
@@ -29,6 +33,14 @@ export function OrderSummary({
             - R${discount.toFixed(2).replace(".", ",")}
           </span>
         </div>
+        {couponDiscount > 0 && (
+          <div className="flex justify-between">
+            <span>Cupom{couponCode ? ` (${couponCode})` : ""}</span>
+            <span className="text-green-600 dark:text-green-400">
+              - R${couponDiscount.toFixed(2).replace(".", ",")}
+            </span>
+          </div>
+        )}
         <div className="flex justify-between">
           <span>Frete</span>
           <span>{shipping}</span>

@@ -5,14 +5,10 @@ import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { CartProvider } from "@/hooks/useCart";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -34,10 +30,12 @@ export default function RootLayout({
           "min-h-screen min-w-screen bg-background text-foreground font-poppins antialiased"
         )}
       >
-        <Toaster richColors theme="light" />
-        <Navbar />
-        <div className="">{children}</div>
-        <Footer />
+        <CartProvider>
+          <Toaster richColors theme="light" />
+          <Navbar />
+          <div className="">{children}</div>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

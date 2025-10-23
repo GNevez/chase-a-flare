@@ -1,12 +1,25 @@
 // components/ProductDetails.tsx
 import FeatureSection from "./FeatureSection";
+import { ProductDetailsProps, Video } from "@/types/product";
+import { useCart } from "@/hooks/useCart";
+import { useToast } from "@/hooks/use-toast";
 
-interface ProductDetailsProps {
-  name: string;
-  price: string;
-  installments: string;
-  sku: string;
-  color: string;
+interface ExtendedProductDetailsProps extends ProductDetailsProps {
+  coresDisponiveis?: Array<{
+    id: number;
+    nome: string;
+    hex1?: string;
+    hex2?: string;
+    quantidadeEstoque: number;
+    imagens: Array<{
+      id: number;
+      url: string;
+    }>;
+  }>;
+  videos?: Video[];
+  selectedColorIndex?: number;
+  onColorChange?: (index: number) => void;
+  produtoId?: number;
 }
 
 const FeatureIcon: React.FC<{ iconPath: string; label: string }> = ({
@@ -30,25 +43,57 @@ const FeatureIcon: React.FC<{ iconPath: string; label: string }> = ({
   </div>
 );
 
-const ProductDetails: React.FC<ProductDetailsProps> = ({
+const ProductDetails: React.FC<ExtendedProductDetailsProps> = ({
   name,
   price,
   installments,
   sku,
   color,
+  maxParcelas,
+  taxaJuros,
+  coresDisponiveis = [],
+  videos = [],
+  selectedColorIndex = 0,
+  onColorChange,
+  produtoId,
 }) => {
+  const { addItem, isLoading } = useCart();
+  const { toast } = useToast();
+
+  const handleAddToCart = async () => {
+    if (produtoId && coresDisponiveis.length > 0) {
+      try {
+        const selectedColor = coresDisponiveis[selectedColorIndex];
+        if (selectedColor) {
+          await addItem(produtoId, selectedColor.id, 1);
+
+          // Mostrar toast de sucesso
+          toast({
+            title: "Produto adicionado!",
+            description: `${name} foi adicionado ao carrinho`,
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Erro",
+          description: "Não foi possível adicionar o produto ao carrinho",
+          variant: "destructive",
+        });
+      }
+    }
+  };
   return (
     <div className="flex flex-col space-y-6">
       {/* Título e Preço */}
       <div>
-        <h1 className="text-4xl font-bold text-primary dark:text-background-light">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-primary dark:text-background-light leading-tight">
           {name}
         </h1>
-        <div className="flex items-baseline space-x-2 mt-4">
-          <p className="text-5xl font-extrabold text-primary dark:text-background-light">
+        <div className="flex flex-col sm:flex-row sm:items-baseline space-y-2 sm:space-y-0 sm:space-x-2 mt-4">
+          <p className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-primary dark:text-background-light">
             {price}
           </p>
-          <span className="text-lg text-primary/70 dark:text-background-light/70 font-light">
+          <span className="text-base sm:text-lg text-primary/70 dark:text-background-light/70 font-light">
             ou {installments}
           </span>
         </div>
@@ -76,15 +121,43 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       {/* Opção de Cor */}
       <div>
         <p className="text-sm font-medium text-primary/80 dark:text-background-light/80 mb-2">
-          Cor: {color} (SKU: {sku})
+          Cores Disponíveis (SKU: {sku})
         </p>
-        {/* A cor seria dinâmica, aqui é um placeholder */}
-        <div className="w-8 h-8 rounded-full bg-primary border-2 border-background-light dark:border-primary"></div>
+        <div className="flex flex-wrap gap-2">
+          {coresDisponiveis.map((cor, index) => {
+            const isSelected = index === selectedColorIndex;
+            const hex1 = cor.hex1 ? `#${cor.hex1}` : "#000000";
+            const hex2 = cor.hex2 ? `#${cor.hex2}` : hex1; // Se não tiver hex2, usa hex1
+
+            return (
+              <div
+                key={index}
+                className={`w-10 h-10 rounded-full border-2 cursor-pointer hover:scale-110 transition-transform ${
+                  isSelected
+                    ? "border-accent ring-2 ring-accent/30"
+                    : "border-gray-300 dark:border-gray-600"
+                }`}
+                style={{
+                  background: `linear-gradient(135deg, ${hex1} 0%, ${hex2} 100%)`,
+                  boxShadow: isSelected
+                    ? "0 0 0 2px rgba(59, 130, 246, 0.3)"
+                    : "none",
+                }}
+                title={cor.nome}
+                onClick={() => onColorChange?.(index)}
+              />
+            );
+          })}
+        </div>
       </div>
 
       {/* Botão de Compra */}
-      <button className="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-primary/90 transition-colors duration-300">
-        Adicionar ao carrinho
+      <button
+        onClick={handleAddToCart}
+        disabled={isLoading || !produtoId || coresDisponiveis.length === 0}
+        className="w-full bg-primary text-white font-bold py-4 rounded-lg hover:bg-primary/90 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isLoading ? "Adicionando..." : "Adicionar ao carrinho"}
       </button>
 
       {/* Benefícios (Compra Segura, Troca Fácil, Frete Rápido) */}
@@ -103,7 +176,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
             iconPath="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0zM13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17h2"
           />
         </div>
-        <FeatureSection />
+        {videos && videos.length > 0 && <FeatureSection videos={videos} />}
       </div>
     </div>
   );

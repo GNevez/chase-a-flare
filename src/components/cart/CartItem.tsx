@@ -7,15 +7,16 @@ type CartItemProps = {
   item: {
     id: number;
     name: string;
-    price: number;
+    price: number; // preço efetivo (após descontos)
+    originalPrice?: number; // preço original unitário
     quantity: number;
     image: string;
+    color?: string;
   };
   onQuantityChange: (productId: number, newQuantity: number) => void;
   onRemove: (productId: number) => void;
   isLastItem: boolean;
 };
-
 
 export function CartItem({
   item,
@@ -24,6 +25,7 @@ export function CartItem({
   isLastItem,
 }: CartItemProps) {
   const totalItemPrice = item.price * item.quantity;
+  const originalTotal = (item.originalPrice ?? item.price) * item.quantity;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
@@ -45,6 +47,9 @@ export function CartItem({
         ></div>
         <div>
           <p className="font-bold text-slate-800">{item.name}</p>
+          {item.color && (
+            <p className="text-sm text-slate-500">Cor: {item.color}</p>
+          )}
           {/* --- MODIFICAÇÃO DO BOTÃO REMOVER --- */}
           <button
             onClick={() => onRemove(item.id)}
@@ -55,7 +60,16 @@ export function CartItem({
         </div>
       </div>
       <div className="col-span-2 text-center font-medium text-slate-700">
-        R${item.price.toFixed(2).replace(".", ",")}
+        {item.originalPrice && item.originalPrice > item.price ? (
+          <div className="flex flex-col items-center leading-tight">
+            <span className="text-xs text-slate-400 line-through">
+              R${item.originalPrice.toFixed(2).replace(".", ",")}
+            </span>
+            <span>R${item.price.toFixed(2).replace(".", ",")}</span>
+          </div>
+        ) : (
+          <span>R${item.price.toFixed(2).replace(".", ",")}</span>
+        )}
       </div>
       <div className="col-span-2 flex justify-center">
         <input
@@ -67,7 +81,16 @@ export function CartItem({
         />
       </div>
       <div className="col-span-2 text-right font-bold text-slate-800">
-        R${totalItemPrice.toFixed(2).replace(".", ",")}
+        {originalTotal > totalItemPrice ? (
+          <div className="flex flex-col items-end leading-tight">
+            <span className="text-xs text-slate-400 line-through font-normal">
+              R${originalTotal.toFixed(2).replace(".", ",")}
+            </span>
+            <span>R${totalItemPrice.toFixed(2).replace(".", ",")}</span>
+          </div>
+        ) : (
+          <span>R${totalItemPrice.toFixed(2).replace(".", ",")}</span>
+        )}
       </div>
     </div>
   );

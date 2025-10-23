@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import ProductDescription from "./ProductDescription";
+
 interface ImageProps {
   src: string;
   alt: string;
@@ -8,11 +8,10 @@ interface ImageProps {
 
 interface ImageGalleryProps {
   images: ImageProps[];
-  description: string;
 }
 
-const ImageGallery: React.FC<ImageGalleryProps> = ({ images, description }) => {
-  const [mainImage, setMainImage] = useState(images[0].src);
+const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
+  const [mainImage, setMainImage] = useState(images[0]?.src || "");
 
   return (
     <div className="flex flex-col">
@@ -35,14 +34,15 @@ const ImageGallery: React.FC<ImageGalleryProps> = ({ images, description }) => {
         </div>
         {/* Imagem Principal */}
         <div className="flex-1">
-          <img
-            alt="Main Product Image"
-            className="w-full h-auto object-cover rounded-xl"
-            src={mainImage}
-          />
+          <div className="aspect-square w-full">
+            <img
+              alt="Main Product Image"
+              className="w-full h-full object-cover rounded-xl"
+              src={mainImage}
+            />
+          </div>
         </div>
       </div>
-      <ProductDescription description={description} />
     </div>
   );
 };

@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -11,45 +10,78 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, X, Trash2, Plus, Minus } from "lucide-react";
-import initialProducts from "@/hooks/temp-data/products.json"; 
 import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
-
-import recommendedProducts from "@/hooks/temp-data/recommendedProducts.json";
+import { useRouter } from "next/navigation";
+import { useCart } from "@/hooks/useCart";
+import { useDiscounts } from "@/hooks/useDiscounts";
+import { useRecommendedProducts } from "@/hooks/useRecommendedProducts";
+import { getImageURL } from "@/lib/utils";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "800"], 
-  variable: "--font-plus-jakarta-sans", 
+  weight: ["300", "400", "500", "700", "800"],
+  variable: "--font-plus-jakarta-sans",
 });
 
 export function Cart() {
-  const [cartItems, setCartItems] = useState(() => {
-    return initialProducts.map(product => ({ ...product, quantity: 1 }));
-  });
+  const router = useRouter();
+  const {
+    cart,
+    isLoading,
+    addItem,
+    updateItemQuantity,
+    removeItem,
+    isCartOpen,
+    setIsCartOpen,
+  } = useCart();
 
-  const itemCount = cartItems.length;
-  const subtotal = cartItems.reduce((acc, product) => acc + (product.price * product.quantity), 0);
+  const {
+    descontos,
+    loading: loadingDescontos,
+    calcularTotal,
+  } = useDiscounts();
 
-  const handleQuantityChange = (productId: number, amount: number) => {
-    setCartItems(currentItems => {
-      const updatedItems = currentItems.map(item => {
-        if (item.id === productId) {
-          const newQuantity = item.quantity + amount;
-          return { ...item, quantity: newQuantity > 0 ? newQuantity : 1 };
-        }
-        return item;
-      });
-      return updatedItems;
-    });
+  const { produtos: recommendedProducts, loading: loadingRecommended } =
+    useRecommendedProducts(5);
+
+  const itemCount = cart?.totalItens || 0;
+  const subtotal = cart?.subtotal || 0;
+
+  const {
+    total: finalTotal,
+    desconto: valorDesconto,
+    descontoInfo,
+  } = calcularTotal(subtotal, itemCount);
+  const hasDiscount = valorDesconto > 0;
+
+  // Encontrar as faixas de desconto ativas para o indicador visual
+  const faixa2 = descontos.find(
+    (d) => d.quantidadeMinima === 2 && d.quantidadeMaxima === 2
+  );
+  const faixa3 = descontos.find(
+    (d) => d.quantidadeMinima === 3 && d.quantidadeMaxima === 3
+  );
+  const faixa4 = descontos.find((d) => d.quantidadeMinima === 4);
+
+  const handleQuantityChange = async (itemId: number, amount: number) => {
+    const currentItem = cart?.itens.find((item) => item.id === itemId);
+    if (currentItem) {
+      const newQuantity = currentItem.quantidade + amount;
+      if (newQuantity > 0) {
+        await updateItemQuantity(itemId, newQuantity);
+      } else {
+        await removeItem(itemId);
+      }
+    }
   };
 
-  const handleRemoveItem = (productId: number) => {
-    setCartItems(currentItems => currentItems.filter(item => item.id !== productId));
+  const handleRemoveItem = async (itemId: number) => {
+    await removeItem(itemId);
   };
 
   return (
-    <Sheet>
+    <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
       <SheetTrigger asChild className={plusJakartaSans.variable}>
         <Button
           size="icon"
@@ -86,7 +118,14 @@ export function Cart() {
         </SheetHeader>
 
         <div className="flex-grow overflow-y-auto no-scrollbar">
-          {itemCount === 0 ? (
+          {isLoading ? (
+            <div className="flex h-full flex-col items-center justify-center gap-6 text-center p-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
+              <p className="text-primary/60 dark:text-white/60">
+                Carregando carrinho...
+              </p>
+            </div>
+          ) : itemCount === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-6 text-center p-6">
               <ShoppingCart
                 size={64}
@@ -103,69 +142,148 @@ export function Cart() {
             </div>
           ) : (
             <div className="p-6">
-              <div className="mb-6">
-                <div className="flex justify-between items-center text-center text-xs text-primary dark:text-white">
-                  <div className="flex-1 flex flex-col items-center relative">
-                    <div className="w-6 h-6 rounded-full bg-accent flex items-center justify-center font-bold text-primary">
-                      1
-                    </div>
-                    <p className="mt-2">2 por R$199</p>
-                    <div className="absolute top-3 left-1/2 w-full h-0.5 bg-gray-200 dark:bg-white/20 -z-10"></div>
-                  </div>
-                  <div className="flex-1 flex flex-col items-center relative">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/20 flex items-center justify-center"></div>
-                    <p className="mt-2 opacity-60">3 por R$299</p>
-                    <div className="absolute top-3 left-0 w-full h-0.5 bg-gray-200 dark:bg-white/20 -z-10"></div>
-                  </div>
-                  <div className="flex-1 flex flex-col items-center">
-                    <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-white/20 flex items-center justify-center"></div>
-                    <p className="mt-2 opacity-60">4 por R$399</p>
+              {!loadingDescontos && descontos.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex justify-between items-center text-center text-xs text-primary dark:text-white">
+                    {/* Primeira etapa: 2 itens */}
+                    {faixa2 && (
+                      <div className="flex-1 flex flex-col items-center relative">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center font-bold transition-colors ${
+                            itemCount >= 2
+                              ? "bg-accent text-primary"
+                              : "bg-gray-200 dark:bg-white/20 text-gray-500"
+                          }`}
+                        >
+                          {itemCount >= 2 ? "✓" : "1"}
+                        </div>
+                        <p
+                          className={`mt-2 ${
+                            itemCount >= 2 ? "" : "opacity-60"
+                          }`}
+                        >
+                          2 itens = R${faixa2.valorPromocional.toFixed(2)}
+                        </p>
+                        {faixa3 && (
+                          <div
+                            className={`absolute top-3 left-[50%] w-full h-0.5 -z-10 transition-colors ${
+                              itemCount >= 3
+                                ? "bg-accent"
+                                : "bg-gray-200 dark:bg-white/20"
+                            }`}
+                          ></div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Segunda etapa: 3 itens */}
+                    {faixa3 && (
+                      <div className="flex-1 flex flex-col items-center relative">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center font-bold transition-colors ${
+                            itemCount >= 3
+                              ? "bg-accent text-primary"
+                              : "bg-gray-200 dark:bg-white/20 text-gray-500"
+                          }`}
+                        >
+                          {itemCount >= 3 ? "✓" : "2"}
+                        </div>
+                        <p
+                          className={`mt-2 ${
+                            itemCount >= 3 ? "" : "opacity-60"
+                          }`}
+                        >
+                          3 itens = R${faixa3.valorPromocional.toFixed(2)}
+                        </p>
+                        {faixa4 && (
+                          <div
+                            className={`absolute top-3 left-[50%] w-full h-0.5 -z-10 transition-colors ${
+                              itemCount >= 4
+                                ? "bg-accent"
+                                : "bg-gray-200 dark:bg-white/20"
+                            }`}
+                          ></div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Terceira etapa: 4+ itens */}
+                    {faixa4 && (
+                      <div className="flex-1 flex flex-col items-center">
+                        <div
+                          className={`w-6 h-6 rounded-full flex items-center justify-center font-bold transition-colors ${
+                            itemCount >= 4
+                              ? "bg-accent text-primary"
+                              : "bg-gray-200 dark:bg-white/20 text-gray-500"
+                          }`}
+                        >
+                          {itemCount >= 4 ? "✓" : "3"}
+                        </div>
+                        <p
+                          className={`mt-2 ${
+                            itemCount >= 4 ? "" : "opacity-60"
+                          }`}
+                        >
+                          4+ itens = R${faixa4.valorPromocional.toFixed(2)}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="space-y-6">
-                {cartItems.map((product) => (
-                  <div key={product.id} className="flex items-center gap-4">
+                {cart?.itens.map((item) => (
+                  <div key={item.id} className="flex items-center gap-4">
                     <div
                       className="w-24 h-24 bg-cover bg-center rounded-xl"
-                      style={{ backgroundImage: `url('${product.image}')` }}
+                      style={{
+                        backgroundImage: `url('${getImageURL(
+                          item.produtoImagem
+                        )}')`,
+                      }}
                     ></div>
                     <div className="flex-1">
                       <h3 className="font-normal text-primary dark:text-white text-lg">
-                        {product.name}
+                        {item.produtoNome}
                       </h3>
+                      <p className="text-sm text-primary/60 dark:text-white/60">
+                        Cor: {item.corNome}
+                      </p>
                       <p className="font-medium text-primary dark:text-white mt-1">
-                        R$ {product.price.toFixed(2).replace(".", ",")}
+                        R$ {item.produtoPreco.toFixed(2).replace(".", ",")}
                       </p>
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-1 border border-slate-200 dark:border-white/20 rounded-md">
                         <Button
-                          onClick={() => handleQuantityChange(product.id, -1)}
+                          onClick={() => handleQuantityChange(item.id, -1)}
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-primary dark:text-white"
+                          disabled={isLoading}
                         >
                           <Minus className="h-4 w-4" />
                         </Button>
                         <span className="w-8 text-center text-sm font-medium text-primary dark:text-white">
-                          {product.quantity}
+                          {item.quantidade}
                         </span>
                         <Button
-                          onClick={() => handleQuantityChange(product.id, 1)}
+                          onClick={() => handleQuantityChange(item.id, 1)}
                           size="icon"
                           variant="ghost"
                           className="h-8 w-8 text-primary dark:text-white"
+                          disabled={isLoading}
                         >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
                       <Button
-                        onClick={() => handleRemoveItem(product.id)}
+                        onClick={() => handleRemoveItem(item.id)}
                         size="icon"
                         variant="ghost"
                         className="text-primary/40 dark:text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-full h-9 w-9"
+                        disabled={isLoading}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -182,34 +300,100 @@ export function Cart() {
             <h3 className="text-lg font-normal text-primary dark:text-white mb-4">
               Você também pode gostar
             </h3>
-            <div className="flex overflow-x-auto space-x-4 pb-4 no-scrollbar">
-              {recommendedProducts.map((item) => (
-                <div key={item.id} className="flex-shrink-0 w-32">
-                  <div
-                    className="w-full h-32 bg-cover bg-center rounded-xl mb-2"
-                    style={{ backgroundImage: `url('${item.image}')` }}
-                  ></div>
-                  <p className="text-sm text-primary dark:text-white truncate">
-                    {item.name}
-                  </p>
-                  <p className="text-sm font-medium text-primary dark:text-white">
-                    R$ {item.price.toFixed(2).replace(".", ",")}
-                  </p>
+            {loadingRecommended ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+              </div>
+            ) : (
+              <div className="flex overflow-x-auto space-x-4 pb-4">
+                {recommendedProducts.map((item, index) => (
+                  <div key={item.id} className="flex-shrink-0 w-32 group">
+                    <div
+                      className="relative cursor-pointer"
+                      onClick={() => {
+                        router.push(`/product/${item.slug}`);
+                        setIsCartOpen(false);
+                      }}
+                    >
+                      <div className="relative w-full overflow-hidden rounded-lg bg-background-dark/5 dark:bg-background-light/5">
+                        <div
+                          className="w-full h-32 bg-cover bg-center rounded-xl transition-all duration-500 ease-in-out group-hover:scale-105"
+                          style={{
+                            backgroundImage: `url('${getImageURL(
+                              item.imagemPrincipal
+                            )}')`,
+                          }}
+                        ></div>
+                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
+
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await addItem(
+                              recommendedProducts[index].id,
+                              recommendedProducts[index].coresDisponiveis[0].id
+                            );
+                          }}
+                          disabled={isLoading}
+                          className="cursor-pointer absolute gap-1 bottom-2 right-2 flex h-8 py-4 px-3 items-center justify-center bg-white/70 dark:bg-white/70 text-primary text-sm font-normal rounded-full opacity-95 hover:opacity-100 transition-all duration-300 scale-95 hover:scale-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Adicionar ao carrinho"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <ShoppingCart className="w-3 h-3" />
+                        </button>
+                      </div>
+
+                      <div className="pt-2">
+                        <p className="text-sm text-primary dark:text-white truncate group-hover:text-accent transition-colors">
+                          {item.nome}
+                        </p>
+                        <p className="text-sm font-medium text-primary dark:text-white">
+                          R$ {item.preco.toFixed(2).replace(".", ",")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="space-y-2">
+              {hasDiscount && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-primary/60 dark:text-white/60">
+                    Subtotal original
+                  </span>
+                  <span className="text-primary/60 dark:text-white/60 line-through">
+                    R$ {subtotal.toFixed(2).replace(".", ",")}
+                  </span>
                 </div>
-              ))}
+              )}
+
+              {hasDiscount && descontoInfo && (
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-green-600 dark:text-green-400 font-medium">
+                    Desconto promocional (
+                    {descontoInfo.descricao || `${itemCount} itens`})
+                  </span>
+                  <span className="text-green-600 dark:text-green-400 font-medium">
+                    -R$ {valorDesconto.toFixed(2).replace(".", ",")}
+                  </span>
+                </div>
+              )}
+
+              <div className="flex justify-between items-center pt-2 border-t border-slate-200 dark:border-white/10">
+                <span className="text-lg font-normal text-primary dark:text-white">
+                  Total
+                </span>
+                <span className="text-xl font-medium text-primary dark:text-white">
+                  R$ {finalTotal.toFixed(2).replace(".", ",")}
+                </span>
+              </div>
             </div>
 
-            <div className="flex justify-between items-center my-4">
-              <span className="text-lg font-normal text-primary dark:text-white">
-                Subtotal
-              </span>
-              <span className="text-xl font-medium text-primary dark:text-white">
-                R$ {subtotal.toFixed(2).replace(".", ",")}
-              </span>
-            </div>
             <Link href="/carrinho">
               <SheetClose asChild>
-                <Button className="w-full cursor-pointer bg-accent text-primary font-medium py-4 h-auto text-base rounded-xl hover:bg-accent/90 transition-colors duration-300">
+                <Button className="w-full cursor-pointer bg-accent text-primary font-medium py-4 h-auto text-base rounded-xl hover:bg-accent/90 transition-colors duration-300 mt-4">
                   Finalizar compra
                 </Button>
               </SheetClose>
