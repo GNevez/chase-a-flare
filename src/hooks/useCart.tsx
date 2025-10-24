@@ -13,6 +13,7 @@ export interface CartItem {
   produtoSKU: string;
   produtoPreco: number;
   produtoImagem: string;
+  produtoSlug: string;
   corNome: string;
   corHex1?: string;
   corHex2?: string;

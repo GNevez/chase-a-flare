@@ -13,9 +13,20 @@ import { useDiscounts } from "@/hooks/useDiscounts";
 import { useCoupon } from "@/hooks/useCoupon";
 import { useToast } from "@/hooks/use-toast";
 import { useCheckout } from "@/hooks/useCheckout";
+import { useClienteVerification } from "@/hooks/useClienteVerification";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import ConfirmClientModal from "./ConfirmClientModal";
+import ConfirmCheckoutModal from "./ConfirmCheckoutModal";
+
+interface ClienteExistente {
+  id: number;
+  nome: string;
+  email: string;
+  cpf: string;
+  telefone?: string;
+}
 
 const installmentOptions = [
   "1x sem juros",
@@ -31,18 +42,16 @@ export function CheckoutPage() {
     email: z.string().email("E-mail inválido"),
     phone: z
       .string()
-      .optional()
-      .transform((v) => (v ? v : ""))
       .refine((v) => !v || v.replace(/\D/g, "").length >= 10, {
         message: "Telefone deve ter pelo menos 10 dígitos",
-      }),
+      })
+      .optional(),
     cpf: z
       .string()
-      .optional()
-      .transform((v) => (v ? v : ""))
       .refine((v) => !v || v.replace(/\D/g, "").length === 11, {
         message: "CPF deve ter 11 dígitos",
-      }),
+      })
+      .optional(),
     zip: z
       .string()
       .min(1, "Informe o CEP")
@@ -65,12 +74,21 @@ export function CheckoutPage() {
   type FormValues = z.infer<typeof FormSchema>;
 
   const [paymentMethod, setPaymentMethod] = useState("cartao_de_credito");
+  const [showConfirmClientModal, setShowConfirmClientModal] = useState(false);
+  const [showConfirmCheckoutModal, setShowConfirmCheckoutModal] =
+    useState(false);
+  const [clienteExistente, setClienteExistente] =
+    useState<ClienteExistente | null>(null);
+  const [atualizarCliente, setAtualizarCliente] = useState(false);
+  const [pendingCheckoutData, setPendingCheckoutData] = useState<any>(null);
+
   const { cart, isLoading } = useCart();
   const { toast } = useToast();
   const { calcularTotal } = useDiscounts();
   const { couponDiscount, couponCode, applyCoupon, clearCoupon, isApplying } =
     useCoupon();
   const { isProcessing, createOrder } = useCheckout();
+  const { verificarCpf, isVerifying } = useClienteVerification();
   const [couponInput, setCouponInput] = useState("");
 
   const {
@@ -202,7 +220,7 @@ export function CheckoutPage() {
 
   const handleCheckout = async (values: FormValues) => {
     try {
-      // Validações básicas
+      // Extrair dados do formulário
       const nome = values.name;
       const email = values.email;
       const telefone = values.phone || "";
@@ -213,34 +231,82 @@ export function CheckoutPage() {
       const cidade = values.city;
       const estado = values.state;
 
-      // Regras acima agora são cobertas por Zod (mantemos limpeza abaixo)
-
       const checkoutData = {
         nome: nome.trim(),
         email: email.trim(),
-        telefone: telefone || null,
-        cpf: cpf || null,
+        telefone: telefone || "",
+        cpf: cpf || "",
         cep: cep.replace(/\D/g, ""),
         logradouro: logradouro.trim(),
         numero: numero || "S/N",
-        complemento: values.complement || null,
+        complemento: values.complement || "",
         bairro: values.neighborhood || "Centro",
         cidade: cidade.trim(),
         estado: estado.trim(),
         metodoPagamento: paymentMethod,
-        precoFrete: null, // por enquanto null
-        observacoes: null,
       };
 
+      // Se CPF foi informado, verificar se já existe
+      if (cpf && cpf.replace(/\D/g, "").length === 11) {
+        const clienteExiste = await verificarCpf(cpf);
+
+        if (clienteExiste) {
+          setClienteExistente(clienteExiste);
+          setPendingCheckoutData(checkoutData);
+          setShowConfirmClientModal(true);
+          return;
+        }
+      }
+
+      setPendingCheckoutData(checkoutData);
+      setShowConfirmCheckoutModal(true);
+    } catch (error) {
+      toast({
+        title: "Erro no checkout",
+        description: "Não foi possível processar o pedido",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUseExistingClient = () => {
+    setShowConfirmClientModal(false);
+    setAtualizarCliente(false);
+    // Mostrar confirmação final com dados existentes
+    if (clienteExistente) {
+      setPendingCheckoutData({
+        ...pendingCheckoutData,
+        nome: clienteExistente.nome,
+        email: clienteExistente.email,
+        telefone: clienteExistente.telefone || "",
+        cpf: clienteExistente.cpf,
+      });
+    }
+    setShowConfirmCheckoutModal(true);
+  };
+
+  const handleUseNewClient = () => {
+    setShowConfirmClientModal(false);
+    setAtualizarCliente(true);
+    // Mostrar confirmação final com dados novos do formulário
+    setShowConfirmCheckoutModal(true);
+  };
+
+  const handleFinalConfirm = async () => {
+    try {
+      if (!pendingCheckoutData) return;
+
       const result = await createOrder({
-        ...checkoutData,
+        ...pendingCheckoutData,
+        precoFrete: null,
+        observacoes: null,
         descontoPorUnidade: promoDiscount,
         descontoCupom: couponDiscount,
+        atualizarCliente: atualizarCliente,
       });
 
       if (!result.success) throw new Error(result.error);
 
-      // Stripe
       toast({
         title: "Checkout realizado!",
         description: "Seu pedido foi processado com sucesso",
@@ -253,6 +319,8 @@ export function CheckoutPage() {
         description: "Não foi possível processar o pedido",
         variant: "destructive",
       });
+    } finally {
+      setShowConfirmCheckoutModal(false);
     }
   };
 
@@ -557,6 +625,28 @@ export function CheckoutPage() {
             />
           </div>
         </form>
+
+        {/* Modal de confirmação de cliente existente */}
+        {clienteExistente && (
+          <ConfirmClientModal
+            isOpen={showConfirmClientModal}
+            onClose={() => setShowConfirmClientModal(false)}
+            clienteExistente={clienteExistente}
+            onUseExisting={handleUseExistingClient}
+            onUseNew={handleUseNewClient}
+          />
+        )}
+
+        {/* Modal de confirmação final do checkout */}
+        {pendingCheckoutData && (
+          <ConfirmCheckoutModal
+            isOpen={showConfirmCheckoutModal}
+            onClose={() => setShowConfirmCheckoutModal(false)}
+            onConfirm={handleFinalConfirm}
+            isLoading={isProcessing}
+            checkoutData={pendingCheckoutData}
+          />
+        )}
       </main>
     </div>
   );

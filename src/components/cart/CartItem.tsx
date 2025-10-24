@@ -2,6 +2,7 @@
 "use client";
 
 import { Trash2 } from "lucide-react"; // Importe o ícone
+import { useRouter } from "next/navigation";
 
 type CartItemProps = {
   item: {
@@ -12,6 +13,7 @@ type CartItemProps = {
     quantity: number;
     image: string;
     color?: string;
+    produtoSlug: string;
   };
   onQuantityChange: (productId: number, newQuantity: number) => void;
   onRemove: (productId: number) => void;
@@ -26,6 +28,8 @@ export function CartItem({
 }: CartItemProps) {
   const totalItemPrice = item.price * item.quantity;
   const originalTotal = (item.originalPrice ?? item.price) * item.quantity;
+
+  const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
@@ -42,8 +46,9 @@ export function CartItem({
     >
       <div className="col-span-6 flex items-center gap-4">
         <div
-          className="w-16 h-16 rounded-lg bg-cover bg-center"
+          className="w-16 h-16 rounded-lg bg-cover cursor-pointer bg-center"
           style={{ backgroundImage: `url("${item.image}")` }}
+          onClick={() => router.push(`/product/${item.produtoSlug}`)}
         ></div>
         <div>
           <p className="font-bold text-slate-800">{item.name}</p>
@@ -53,7 +58,7 @@ export function CartItem({
           {/* --- MODIFICAÇÃO DO BOTÃO REMOVER --- */}
           <button
             onClick={() => onRemove(item.id)}
-            className="flex items-center gap-1 text-xs text-slate-500 hover:text-red-500 transition-colors"
+            className="flex cursor-pointer items-center gap-1 text-xs text-slate-500 hover:text-red-500 transition-colors"
           >
             Remover
           </button>

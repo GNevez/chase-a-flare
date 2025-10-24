@@ -6,6 +6,13 @@ const nextConfig = {
         protocol: "https",
         hostname: "**",
       },
+      // Allow API images served from local backend in development
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "5006",
+        pathname: "/**",
+      },
     ],
   },
 };

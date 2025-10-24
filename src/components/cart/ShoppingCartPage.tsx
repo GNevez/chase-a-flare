@@ -165,6 +165,7 @@ export function ShoppingCartPage() {
                     quantity: item.quantidade,
                     image: `http://localhost:5006${item.produtoImagem}`,
                     color: item.corNome,
+                    produtoSlug: item.produtoSlug,
                   }}
                   onQuantityChange={handleQuantityChange}
                   onRemove={handleRemoveItem}
