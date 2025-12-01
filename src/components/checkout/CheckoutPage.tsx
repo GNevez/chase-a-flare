@@ -4,21 +4,23 @@ import { FormSection } from "./FormSection";
 import { OrderSummary } from "./OrderSummary";
 import { FormInput } from "./FormInput";
 import { MaskedInput } from "./MaskedInput";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { FormSelect } from "./FormSelect";
 import { QrCode, ArrowLeft } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
 import { useDiscounts } from "@/hooks/useDiscounts";
 import { useCoupon } from "@/hooks/useCoupon";
-import { useToast } from "@/hooks/use-toast";
-import { useCheckout } from "@/hooks/useCheckout";
+import { toast } from "sonner";
 import { useClienteVerification } from "@/hooks/useClienteVerification";
+import { usePagarme } from "@/hooks/usePagarme";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ConfirmClientModal from "./ConfirmClientModal";
 import ConfirmCheckoutModal from "./ConfirmCheckoutModal";
+import { CardForm } from "./CardForm";
 
 interface ClienteExistente {
   id: number;
@@ -27,14 +29,6 @@ interface ClienteExistente {
   cpf: string;
   telefone?: string;
 }
-
-const installmentOptions = [
-  "1x sem juros",
-  "2x sem juros",
-  "3x sem juros",
-  "4x com juros",
-  "5x com juros",
-];
 
 export function CheckoutPage() {
   const FormSchema = z.object({
@@ -64,15 +58,12 @@ export function CheckoutPage() {
     neighborhood: z.string().optional(),
     city: z.string().min(2, "Cidade muito curta"),
     state: z.string().min(2, "Estado muito curto"),
-    card_holder: z.string().optional(),
-    card_number: z.string().optional(),
-    expiry_date: z.string().optional(),
-    cvv: z.string().optional(),
     installments: z.string().optional(),
   });
 
   type FormValues = z.infer<typeof FormSchema>;
 
+  const router = useRouter();
   const [paymentMethod, setPaymentMethod] = useState("cartao_de_credito");
   const [showConfirmClientModal, setShowConfirmClientModal] = useState(false);
   const [showConfirmCheckoutModal, setShowConfirmCheckoutModal] =
@@ -82,18 +73,26 @@ export function CheckoutPage() {
   const [atualizarCliente, setAtualizarCliente] = useState(false);
   const [pendingCheckoutData, setPendingCheckoutData] = useState<any>(null);
 
+  const cardFormRef = useRef<any>(null);
+
   const { cart, isLoading } = useCart();
-  const { toast } = useToast();
+
   const { calcularTotal } = useDiscounts();
   const { couponDiscount, couponCode, applyCoupon, clearCoupon, isApplying } =
     useCoupon();
-  const { isProcessing, createOrder } = useCheckout();
   const { verificarCpf, isVerifying } = useClienteVerification();
+  const {
+    isCreatingOrder,
+    error: pagarmeError,
+    createOrder: createPagarmeOrder,
+  } = usePagarme();
   const [couponInput, setCouponInput] = useState("");
 
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
@@ -156,26 +155,6 @@ export function CheckoutPage() {
     ref: refState,
   } = register("state");
   const {
-    onChange: onChangeCardHolder,
-    onBlur: onBlurCardHolder,
-    ref: refCardHolder,
-  } = register("card_holder");
-  const {
-    onChange: onChangeCardNumber,
-    onBlur: onBlurCardNumber,
-    ref: refCardNumber,
-  } = register("card_number");
-  const {
-    onChange: onChangeExpiryDate,
-    onBlur: onBlurExpiryDate,
-    ref: refExpiryDate,
-  } = register("expiry_date");
-  const {
-    onChange: onChangeCvv,
-    onBlur: onBlurCvv,
-    ref: refCvv,
-  } = register("cvv");
-  const {
     onChange: onChangeInstallments,
     onBlur: onBlurInstallments,
     ref: refInstallments,
@@ -213,6 +192,149 @@ export function CheckoutPage() {
   const totalBaseForCoupon = totalAfterPromo + shipping;
   const total = Math.max(0, totalBaseForCoupon - couponDiscount);
 
+  const cartAllowedMaxParcelas = (() => {
+    if (!cart || !cart.itens || cart.itens.length === 0) return null;
+    const values = cart.itens.map(
+      (it: any) => it.produtoMaxParcelas ?? Infinity
+    );
+    const min = values.reduce(
+      (acc: number, v: number) => Math.min(acc, v),
+      Infinity
+    );
+    return isFinite(min) ? Math.max(1, min) : null;
+  })();
+
+  const cartMaxTaxa = (() => {
+    if (!cart || !cart.itens || cart.itens.length === 0) return 0;
+    const taxas = cart.itens.map((it: any) => it.produtoTaxaJuros ?? 0);
+    return taxas.length ? Math.max(...taxas) : 0;
+  })();
+
+  const perInstallmentForN = (n: number) => {
+    if (!cart || !cart.itens) return 0;
+    const taxa = n > 1 ? cartMaxTaxa : 0;
+    const subtotalItems = cart.itens.reduce(
+      (acc: number, it: any) =>
+        acc + (it.produtoPreco ?? 0) * (it.quantidade ?? 1),
+      0
+    );
+    const totalWithInterest = subtotalItems * (1 + taxa);
+    return totalWithInterest / n;
+  };
+
+  const handleUseNewClient = () => {
+    setShowConfirmClientModal(false);
+    setAtualizarCliente(true);
+    setShowConfirmCheckoutModal(true);
+  };
+
+  const handleFinalConfirm = async () => {
+    try {
+      if (!pendingCheckoutData) return;
+
+      let cardToken: string | null = null;
+
+      if (pendingCheckoutData.metodoPagamento === "cartao_de_credito") {
+        if (!cardFormRef.current) {
+          toast.error("Formulário de cartão não inicializado");
+          return;
+        }
+
+        try {
+          cardToken = await cardFormRef.current.getCardToken();
+          if (!cardToken) {
+            toast.error("Não foi possível tokenizar o cartão");
+            return;
+          }
+        } catch (err: any) {
+          toast.error(err?.message || "Erro ao tokenizar cartão");
+          return;
+        }
+      }
+
+      const payload = {
+        ...pendingCheckoutData,
+        precoFrete: pendingCheckoutData?.precoFrete ?? shipping,
+        observacoes: null,
+        descontoPorUnidade: promoDiscount,
+        descontoCupom: couponDiscount,
+        atualizarCliente: atualizarCliente,
+        totalEnviado: pendingCheckoutData?.totalEnviado,
+        parcelasNum: pendingCheckoutData?.parcelasNum,
+        cardToken: cardToken,
+      };
+
+      const result = await createPagarmeOrder(payload);
+
+      if (!result) {
+        toast.error(pagarmeError || "Erro ao criar pedido");
+        setShowConfirmCheckoutModal(false);
+        return;
+      }
+
+      if (result.pix && result.orderId) {
+        toast.success("Pedido criado! Gerando QR Code PIX...");
+        setShowConfirmCheckoutModal(false);
+        router.push(`/carrinho/checkout/pix/${result.orderId}`);
+        return;
+      }
+
+      if (result.orderId) {
+        toast.success("Pedido criado! Processando pagamento...");
+        router.push(`/carrinho/checkout/processando/${result.orderId}`);
+      } else {
+        toast.success("Pedido criado com sucesso!");
+      }
+      setShowConfirmCheckoutModal(false);
+    } catch (error: any) {
+      toast.error(error?.message || "Não foi possível processar o pedido");
+      setShowConfirmCheckoutModal(false);
+    }
+  };
+
+  const dynamicInstallmentOptions: string[] = [];
+  if (cartAllowedMaxParcelas) {
+    for (let i = 1; i <= cartAllowedMaxParcelas; i++) {
+      const per = perInstallmentForN(i);
+      if ((cartMaxTaxa ?? 0) <= 0) {
+        dynamicInstallmentOptions.push(
+          `${i}x de R$ ${per.toFixed(2).replace(".", ",")} sem juros`
+        );
+      } else {
+        if (i === 1) {
+          dynamicInstallmentOptions.push(
+            `${i}x de R$ ${per.toFixed(2).replace(".", ",")} sem juros`
+          );
+        } else {
+          dynamicInstallmentOptions.push(
+            `${i}x c/ juros de R$ ${per.toFixed(2).replace(".", ",")}`
+          );
+        }
+      }
+    }
+  } else {
+    // fallback: if cart doesn't provide a max parcelas, generate up to 12
+    const fallbackMax = 12;
+    for (let i = 1; i <= fallbackMax; i++) {
+      const per = perInstallmentForN(i);
+      if ((cartMaxTaxa ?? 0) <= 0) {
+        dynamicInstallmentOptions.push(
+          `${i}x de R$ ${per.toFixed(2).replace(".", ",")} sem juros`
+        );
+      } else {
+        if (i === 1) {
+          dynamicInstallmentOptions.push(
+            `${i}x de R$ ${per.toFixed(2).replace(".", ",")} sem juros`
+          );
+        } else {
+          dynamicInstallmentOptions.push(
+            `${i}x c/ juros de R$ ${per.toFixed(2).replace(".", ",")}`
+          );
+        }
+      }
+    }
+  }
+
   const onApplyCoupon = async () => {
     if (!couponInput.trim()) return;
     await applyCoupon(couponInput.trim(), totalBaseForCoupon);
@@ -220,7 +342,6 @@ export function CheckoutPage() {
 
   const handleCheckout = async (values: FormValues) => {
     try {
-      // Extrair dados do formulário
       const nome = values.name;
       const email = values.email;
       const telefone = values.phone || "";
@@ -244,35 +365,60 @@ export function CheckoutPage() {
         cidade: cidade.trim(),
         estado: estado.trim(),
         metodoPagamento: paymentMethod,
+        installmentsSelected: values.installments || null,
       };
 
-      // Se CPF foi informado, verificar se já existe
+      let parcelasNum = 1;
+      if (checkoutData.installmentsSelected) {
+        const m = checkoutData.installmentsSelected.match(/^\s*(\d+)/);
+        parcelasNum = m ? parseInt(m[1], 10) : cartAllowedMaxParcelas ?? 1;
+      } else {
+        parcelasNum = cartAllowedMaxParcelas ?? 1;
+      }
+
+      const taxaUsada = parcelasNum > 1 ? cartMaxTaxa : 0;
+      const subtotalItems = cart.itens.reduce(
+        (acc: number, it: any) =>
+          acc + (it.produtoPreco ?? 0) * (it.quantidade ?? 1),
+        0
+      );
+      const precoComJuros =
+        subtotalItems * (1 + taxaUsada) +
+        shipping -
+        couponDiscount -
+        promoDiscount;
+
+      const checkoutDataWithTotals = {
+        ...checkoutData,
+        precoComJuros,
+        parcelasNum,
+        totalEnviado: precoComJuros,
+        precoFrete: shipping,
+        descontoPorUnidade: promoDiscount,
+        descontoCupom: couponDiscount,
+      };
+
       if (cpf && cpf.replace(/\D/g, "").length === 11) {
         const clienteExiste = await verificarCpf(cpf);
 
         if (clienteExiste) {
           setClienteExistente(clienteExiste);
-          setPendingCheckoutData(checkoutData);
+          setPendingCheckoutData(checkoutDataWithTotals);
           setShowConfirmClientModal(true);
           return;
         }
       }
 
-      setPendingCheckoutData(checkoutData);
+      setPendingCheckoutData(checkoutDataWithTotals);
       setShowConfirmCheckoutModal(true);
     } catch (error) {
-      toast({
-        title: "Erro no checkout",
-        description: "Não foi possível processar o pedido",
-        variant: "destructive",
-      });
+      toast.error("Não foi possível processar o pedido");
     }
   };
 
   const handleUseExistingClient = () => {
     setShowConfirmClientModal(false);
     setAtualizarCliente(false);
-    // Mostrar confirmação final com dados existentes
     if (clienteExistente) {
       setPendingCheckoutData({
         ...pendingCheckoutData,
@@ -285,45 +431,6 @@ export function CheckoutPage() {
     setShowConfirmCheckoutModal(true);
   };
 
-  const handleUseNewClient = () => {
-    setShowConfirmClientModal(false);
-    setAtualizarCliente(true);
-    // Mostrar confirmação final com dados novos do formulário
-    setShowConfirmCheckoutModal(true);
-  };
-
-  const handleFinalConfirm = async () => {
-    try {
-      if (!pendingCheckoutData) return;
-
-      const result = await createOrder({
-        ...pendingCheckoutData,
-        precoFrete: null,
-        observacoes: null,
-        descontoPorUnidade: promoDiscount,
-        descontoCupom: couponDiscount,
-        atualizarCliente: atualizarCliente,
-      });
-
-      if (!result.success) throw new Error(result.error);
-
-      toast({
-        title: "Checkout realizado!",
-        description: "Seu pedido foi processado com sucesso",
-      });
-
-      window.location.href = "/checkout/success";
-    } catch (error) {
-      toast({
-        title: "Erro no checkout",
-        description: "Não foi possível processar o pedido",
-        variant: "destructive",
-      });
-    } finally {
-      setShowConfirmCheckoutModal(false);
-    }
-  };
-
   return (
     <div className="bg-white font-display text-primary pt-24">
       <main className="container mx-auto px-4 lg:px-8 flex-grow">
@@ -331,7 +438,6 @@ export function CheckoutPage() {
           id="checkoutForm"
           noValidate
           onSubmit={handleSubmit(handleCheckout, (invalid) => {
-            // Debug rápido de validação
             console.debug("invalid submit", invalid);
           })}
           className="grid grid-cols-1 lg:grid-cols-3 gap-16 pt-24"
@@ -546,48 +652,20 @@ export function CheckoutPage() {
 
                 {paymentMethod === "cartao_de_credito" && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormInput
-                      label="Nome do Titular"
-                      placeholder="Como está no cartão"
-                      name="card_holder"
-                      onChange={onChangeCardHolder}
-                      onBlur={onBlurCardHolder}
-                      ref={refCardHolder}
-                      containerClassName="col-span-2"
-                    />
-                    <FormInput
-                      label="Número do Cartão"
-                      placeholder="•••• •••• •••• ••••"
-                      name="card_number"
-                      onChange={onChangeCardNumber}
-                      onBlur={onBlurCardNumber}
-                      ref={refCardNumber}
-                      containerClassName="col-span-2"
-                    />
-                    <FormInput
-                      label="Data de Validade"
-                      placeholder="MM/AA"
-                      name="expiry_date"
-                      onChange={onChangeExpiryDate}
-                      onBlur={onBlurExpiryDate}
-                      ref={refExpiryDate}
-                    />
-                    <FormInput
-                      label="CVV"
-                      placeholder="•••"
-                      name="cvv"
-                      onChange={onChangeCvv}
-                      onBlur={onBlurCvv}
-                      ref={refCvv}
-                    />
+                    <CardForm ref={cardFormRef} />
                     <FormSelect
                       label="Parcelas"
                       name="installments"
                       onChange={onChangeInstallments}
                       onBlur={onBlurInstallments}
                       ref={refInstallments}
-                      options={installmentOptions}
+                      options={
+                        dynamicInstallmentOptions.length
+                          ? dynamicInstallmentOptions
+                          : []
+                      }
                       containerClassName="col-span-2"
+                      placeholder="Selecione o número de parcelas"
                     />
                   </div>
                 )}
@@ -613,6 +691,15 @@ export function CheckoutPage() {
                 quantity: item.quantidade,
                 price: item.produtoPreco,
                 image: `http://localhost:5006${item.produtoImagem}`,
+                // incluir informações de parcelamento/juros trazidas do backend
+                maxParcelas:
+                  (item as any).produtoMaxParcelas ??
+                  (item as any).produtoMaxParcelas ??
+                  undefined,
+                taxaJuros:
+                  (item as any).produtoTaxaJuros ??
+                  (item as any).produtoTaxaJuros ??
+                  undefined,
               }))}
               subtotal={subtotal}
               promotionDiscount={promoDiscount}
@@ -620,8 +707,11 @@ export function CheckoutPage() {
               couponCode={couponCode}
               shipping={shipping}
               total={total}
+              installmentsSelected={
+                paymentMethod === "pix" ? null : watch("installments")
+              }
               formId="checkoutForm"
-              isProcessing={isProcessing}
+              isProcessing={isCreatingOrder}
             />
           </div>
         </form>
@@ -643,7 +733,7 @@ export function CheckoutPage() {
             isOpen={showConfirmCheckoutModal}
             onClose={() => setShowConfirmCheckoutModal(false)}
             onConfirm={handleFinalConfirm}
-            isLoading={isProcessing}
+            isLoading={isCreatingOrder}
             checkoutData={pendingCheckoutData}
           />
         )}

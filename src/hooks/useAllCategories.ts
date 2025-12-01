@@ -10,7 +10,7 @@ interface Category {
   mensagem?: string;
 }
 
-export function useCategories() {
+export function useAllCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,10 +23,7 @@ export function useCategories() {
       if (!response.data) {
         throw new Error("Erro ao buscar categorias");
       }
-      const data = response.data;
-      // Pegar apenas 5 categorias aleatórias
-      const shuffled = data.sort(() => 0.5 - Math.random());
-      setCategories(shuffled.slice(0, 5));
+      setCategories(response.data);
     } catch (err: any) {
       console.error("Erro ao buscar categorias:", err);
       setError(

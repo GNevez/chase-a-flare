@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import apiClient from "@/lib/api";
 
 interface Product {
   id: number;
@@ -31,21 +32,22 @@ export function useProductsByCategory(categoryId: number) {
 
   const fetchProducts = async (id: number) => {
     if (!id) return;
-    
+
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5006/api/produto/categoria/${id}`);
-      if (!response.ok) {
-        throw new Error("Erro ao buscar produtos da categoria");
-      }
-      const data = await response.json();
+      const response = await apiClient.get<Product[]>(
+        `/api/produto/categoria/${id}`
+      );
+      const data = response.data;
       // Pegar apenas 10 produtos aleatórios
       const shuffled = data.sort(() => 0.5 - Math.random());
       setProducts(shuffled.slice(0, 10));
     } catch (err: any) {
       console.error("Erro ao buscar produtos:", err);
-      setError(err.message);
+      setError(
+        err.response?.data?.message || err.message || "Erro ao buscar produtos"
+      );
     } finally {
       setIsLoading(false);
     }

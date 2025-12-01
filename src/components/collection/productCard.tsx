@@ -47,8 +47,14 @@ export function ProductCard({ product }: ProductCardProps) {
       ? getImageURL(product.imagemHover)
       : getImageURL(product.imagemPrincipal);
 
+  // Garantir que o preço é um número válido
+  const preco = Number(product.preco) || 0;
+  const precoOriginal = product.precoOriginal
+    ? Number(product.precoOriginal)
+    : null;
+
   // Calcular parcelas (assumindo 12x sem juros)
-  const installments = product.preco / 12;
+  const installments = preco / 12;
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevenir navegação para a página do produto
@@ -94,13 +100,13 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Badges de Sale e New */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.isSale && (
-            <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-              SALE
+            <span className="bg-primary text-accent flex justify-center text-xs px-2 py-1 rounded-sm font-semibold">
+              Promoção
             </span>
           )}
           {product.isNew && (
-            <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-              NEW
+            <span className="bg-accent text-primary flex justify-center text-xs px-2 py-1 rounded-sm font-semibold">
+              Lançamento
             </span>
           )}
         </div>
@@ -126,11 +132,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
         <div className="flex items-center gap-2">
           <p className="text-primary text-base font-bold">
-            R$ {product.preco.toFixed(2).replace(".", ",")}
+            R$ {preco.toFixed(2).replace(".", ",")}
           </p>
-          {product.precoOriginal && product.precoOriginal > product.preco && (
+          {precoOriginal && precoOriginal > preco && (
             <p className="text-primary/70 text-sm line-through">
-              R$ {product.precoOriginal.toFixed(2).replace(".", ",")}
+              R$ {precoOriginal.toFixed(2).replace(".", ",")}
             </p>
           )}
         </div>
@@ -148,12 +154,31 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.coresDisponiveis.slice(0, 3).map((cor) => (
                 <div
                   key={cor.id}
-                  className="w-4 h-4 rounded-full border border-black/10"
-                  style={{
-                    backgroundColor: cor.hex1 ? `#${cor.hex1}` : "#000000",
-                  }}
+                  className="w-4 h-4 rounded-full border border-black/10 overflow-hidden"
                   title={cor.nome}
-                />
+                >
+                  {cor.hex1 && cor.hex2 ? (
+                    // Duas cores - dividir ao meio
+                    <div className="w-full h-full flex">
+                      <div
+                        className="w-1/2 h-full"
+                        style={{ backgroundColor: `#${cor.hex1}` }}
+                      />
+                      <div
+                        className="w-1/2 h-full"
+                        style={{ backgroundColor: `#${cor.hex2}` }}
+                      />
+                    </div>
+                  ) : (
+                    // Uma cor apenas
+                    <div
+                      className="w-full h-full"
+                      style={{
+                        backgroundColor: cor.hex1 ? `#${cor.hex1}` : "#000000",
+                      }}
+                    />
+                  )}
+                </div>
               ))}
               {product.coresDisponiveis.length > 3 && (
                 <span className="text-xs text-primary/60">

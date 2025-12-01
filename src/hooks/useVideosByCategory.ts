@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Video } from "@/types/product";
+import apiClient from "@/lib/api";
 
 export function useVideosByCategory(categoryId: number) {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -8,19 +9,19 @@ export function useVideosByCategory(categoryId: number) {
 
   const fetchVideos = async (id: number) => {
     if (!id) return;
-    
+
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5006/api/video/categoria/${id}`);
-      if (!response.ok) {
-        throw new Error("Erro ao buscar vídeos da categoria");
-      }
-      const data = await response.json();
-      setVideos(data);
+      const response = await apiClient.get<Video[]>(
+        `/api/video/categoria/${id}`
+      );
+      setVideos(response.data);
     } catch (err: any) {
       console.error("Erro ao buscar vídeos:", err);
-      setError(err.message);
+      setError(
+        err.response?.data?.message || err.message || "Erro ao buscar vídeos"
+      );
     } finally {
       setIsLoading(false);
     }

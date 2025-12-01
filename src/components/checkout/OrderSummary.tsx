@@ -8,6 +8,8 @@ type OrderItem = {
   quantity: number;
   price: number;
   image: string;
+  maxParcelas?: number;
+  taxaJuros?: number;
 };
 
 type OrderSummaryProps = {
@@ -18,9 +20,10 @@ type OrderSummaryProps = {
   couponCode?: string;
   shipping: number;
   total: number;
+  installmentsSelected?: string | null;
   onCheckout?: () => void;
   isProcessing?: boolean;
-  formId?: string; // when provided, button will submit this form
+  formId?: string; 
 };
 
 export function OrderSummary({
@@ -31,10 +34,42 @@ export function OrderSummary({
   couponCode,
   shipping,
   total,
+  installmentsSelected,
   onCheckout,
   isProcessing = false,
   formId,
 }: OrderSummaryProps) {
+  const availableMax = items
+    .map((it) => it.maxParcelas ?? Infinity)
+    .reduce((acc, v) => Math.min(acc, v), Infinity);
+
+  const allowedInstallments = isFinite(availableMax)
+    ? Math.max(1, availableMax)
+    : 1;
+
+  const parcelasNum = (() => {
+    if (!installmentsSelected) return allowedInstallments;
+    const m = installmentsSelected.match(/^\s*(\d+)/);
+    return m ? Math.max(1, parseInt(m[1], 10)) : allowedInstallments;
+  })();
+
+  const cartMaxTaxa = items.length
+    ? Math.max(...items.map((it) => it.taxaJuros ?? 0))
+    : 0;
+  const taxaUsada = parcelasNum > 1 ? cartMaxTaxa : 0;
+
+  const itemsTotal = subtotal;
+  const baseTotal = Math.max(
+    0,
+    itemsTotal + shipping - (promotionDiscount ?? 0) - (couponDiscount ?? 0)
+  );
+
+  const totalWithInterest = itemsTotal * (1 + taxaUsada) + shipping - (promotionDiscount ?? 0) - (couponDiscount ?? 0);
+  const interestAmount = Math.max(0, totalWithInterest - baseTotal);
+  const perInstallment = parcelasNum > 0 ? totalWithInterest / parcelasNum : totalWithInterest;
+  const hasInterest = (taxaUsada ?? 0) > 0;
+  const displayTotal = hasInterest ? totalWithInterest : baseTotal;
+
   return (
     <div className="bg-background-light border border-neutral-200 rounded-xl p-6 sticky my-12 top-46">
       <h3 className="text-xl font-bold mb-6">Resumo do Pedido</h3>
@@ -91,10 +126,22 @@ export function OrderSummary({
         </div>
       </div>
       <div className="border-t border-primary/20 my-6"></div>
-      <div className="flex justify-between font-bold text-lg">
-        <p>Total</p>
-        <p>R${total.toFixed(2).replace(".", ",")}</p>
-      </div>
+      {installmentsSelected && parcelasNum > 1 ? (
+        <>
+          <div className="flex justify-between font-bold text-lg">
+            <p>Total</p>
+            <p>R${displayTotal.toFixed(2).replace(".", ",")}</p>
+          </div>
+          <p className="text-end text-sm">
+            em {parcelasNum}x {hasInterest ? "c/ juros" : "sem juros"}
+          </p>
+        </>
+      ) : (
+        <div className="flex justify-between font-bold text-lg">
+          <p>Total</p>
+          <p>R${total.toFixed(2).replace(".", ",")}</p>
+        </div>
+      )}
       <Button
         type="submit"
         form={formId}

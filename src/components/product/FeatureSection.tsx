@@ -1,6 +1,7 @@
 // components/FeatureSection.tsx
 import React from 'react';
 import { FeatureSectionProps } from "@/types/product";
+import { getImageURL } from "@/lib/utils";
 
 const FeatureSection: React.FC<FeatureSectionProps> = ({ videos }) => {
   if (!videos || videos.length === 0) return null;
@@ -20,15 +21,10 @@ const FeatureSection: React.FC<FeatureSectionProps> = ({ videos }) => {
               loop
               playsInline
               poster={
-                video.thumbnail
-                  ? `http://localhost:5006${video.thumbnail}`
-                  : undefined
+                video.thumbnail ? getImageURL(video.thumbnail) : undefined
               }
             >
-              <source
-                src={`http://localhost:5006${video.url}`}
-                type="video/mp4"
-              />
+              <source src={getImageURL(video.url)} type="video/mp4" />
               Seu navegador não suporta vídeos.
             </video>
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 rounded-xl flex items-center justify-center">

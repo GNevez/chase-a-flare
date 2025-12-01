@@ -288,3 +288,42 @@
 }
  
 }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: inline-flex; 
+  gap: 0;
+  will-change: transform;
+  animation: marquee 18s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+/* Pixel-based marquee: translate by the measured width of one copy (--copy-width)
+   This avoids relying on percentage widths and prevents gaps when fonts differ. */
+@keyframes marquee-px {
+  from { transform: translateX(0); }
+  to   { transform: translateX(calc(-1 * var(--copy-width))); }
+}
+
+.animate-marquee-px {
+  display: inline-flex;
+  gap: 0;
+  will-change: transform;
+  /* duration can be overridden via --marquee-duration */
+  animation: marquee-px var(--marquee-duration, 18s) linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-px {
+    animation: none;
+  }
+}

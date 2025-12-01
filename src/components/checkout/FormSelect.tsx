@@ -4,12 +4,21 @@ type FormSelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   label: string;
   name: string;
   options: string[];
+  placeholder?: string;
   containerClassName?: string;
 };
 
 export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
   (
-    { label, name, options, containerClassName = "", className = "", ...props },
+    {
+      label,
+      name,
+      options,
+      placeholder,
+      containerClassName = "",
+      className = "",
+      ...props
+    },
     ref
   ) => {
     return (
@@ -27,6 +36,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
           className={`w-full bg-white border border-neutral-300 rounded-lg p-3 focus:ring-2 focus:ring-primary focus:border-primary transition-all ${className}`}
           {...props}
         >
+          {placeholder ? <option value="">{placeholder}</option> : null}
           {options.map((option) => (
             <option key={option} value={option}>
               {option}

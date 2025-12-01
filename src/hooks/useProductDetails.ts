@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import apiClient from "@/lib/api";
 
 interface ProductDetails {
   id: number;
@@ -37,16 +38,14 @@ export function useProductDetails(slug: string) {
 
   const fetchProduct = async () => {
     if (!slug) return;
-    
+
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:5006/api/produto/detalhado/${slug}`);
-      if (!response.ok) {
-        throw new Error("Produto não encontrado");
-      }
-      const data = await response.json();
-      setProduct(data);
+      const response = await apiClient.get<ProductDetails>(
+        `/api/produto/detalhado/${slug}`
+      );
+      setProduct(response.data);
     } catch (err: any) {
       console.error("Erro ao buscar produto:", err);
       setError(err.message);

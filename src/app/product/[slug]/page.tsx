@@ -8,7 +8,9 @@ import RelatedProducts from "@/components/product/RelatedProducts";
 import FeatureSection from "@/components/product/FeatureSection";
 import { useProductDetails } from "@/hooks/useProductDetails";
 import { useVideosByCategory } from "@/hooks/useVideosByCategory";
+import { useRelatedProducts } from "@/hooks/useRelatedProducts";
 import { Video } from "@/types/product";
+import { getImageURL } from "@/lib/utils";
 
 const ProductPage: React.FC = () => {
   const params = useParams();
@@ -18,6 +20,11 @@ const ProductPage: React.FC = () => {
   
   const { product, isLoading, error } = useProductDetails(slug);
   const { videos } = useVideosByCategory(product?.categoriaId || 0);
+  const { products: relatedProducts } = useRelatedProducts(
+    product?.categoriaId || 0,
+    product?.id || 0,
+    10
+  );
 
   // Resolver erro de hidratação
   useEffect(() => {
@@ -76,21 +83,18 @@ const ProductPage: React.FC = () => {
 
   // Preparar imagens para a galeria (apenas da cor selecionada)
   const selectedColor = product.coresDisponiveis[selectedColorIndex];
-  const images = selectedColor ? selectedColor.imagens.slice(0, 5).map(img => ({
-    src: `http://localhost:5006${img.url}`,
-    alt: `${selectedColor.nome} - ${img.id}`,
-  })) : [];
+  const images = selectedColor
+    ? selectedColor.imagens.slice(0, 5).map((img) => ({
+        src: getImageURL(img.url),
+        alt: `${selectedColor.nome} - ${img.id}`,
+      }))
+    : [];
 
   // Calcular parcelas
   const valorParcela = product.preco / product.maxParcelas;
-  const installments = `${product.maxParcelas}x de R$ ${valorParcela.toFixed(2).replace(".", ",")}`;
-
-  // Preparar produtos relacionados usando vídeos da categoria
-  const relatedProducts = videos ? videos.slice(0, 4).map(video => ({
-    name: video.titulo,
-    price: "R$ 299,00", // Preço fixo por enquanto
-    image: video.thumbnail ? `http://localhost:5006${video.thumbnail}` : "https://via.placeholder.com/300x300",
-  })) : [];
+  const installments = `${product.maxParcelas}x de R$ ${valorParcela
+    .toFixed(2)
+    .replace(".", ",")}`;
 
   return (
     <div className="bg-white font-display text-primary pt-24">
@@ -99,7 +103,7 @@ const ProductPage: React.FC = () => {
           {/* Coluna 1: Galeria de Imagens + Descrição */}
           <div className="space-y-8">
             <ImageGallery images={images} />
-            
+
             {/* Descrição - Desktop: ao lado das imagens, Mobile: antes dos vídeos */}
             {product.descricao && (
               <div className="lg:block hidden">
@@ -122,7 +126,7 @@ const ProductPage: React.FC = () => {
             produtoId={product.id}
             {...({
               coresDisponiveis: product.coresDisponiveis,
-              videos: videos || []
+              videos: videos || [],
             } as any)}
           />
         </div>

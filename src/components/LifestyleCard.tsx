@@ -1,17 +1,24 @@
 "use client";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 interface LifestyleCardProps {
   id: string;
   name: string;
-  price: number;
-  image: string;
+  price?: number;
+  image?: string;
+  videoUrl?: string;
+  slug: string;
+  poster?: string;
 }
 
 export const LifestyleCard: React.FC<LifestyleCardProps> = ({
   name,
   price,
   image,
+  videoUrl,
+  poster,
+  slug
 }) => {
   // Estado para controlar a visibilidade do modal de seleção de cor
   const [isOptionsOpen, setOptionsOpen] = useState(false);
@@ -19,15 +26,33 @@ export const LifestyleCard: React.FC<LifestyleCardProps> = ({
   const formatPrice = (price: number) =>
     `R$ ${price.toFixed(2).replace(".", ",")}`;
 
+  const router = useRouter();
+
+  const handleGotoCollection = () => {
+    router.push(`/collections/${slug}`);
+  }
+
   return (
     <div className="relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
       {/* Aumentado AINDA MAIS a altura do card mudando o aspect ratio para [1/2] */}
       <div className="aspect-[1/2] relative">
-        <img
-          src={image}
-          alt={name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-        />
+        {videoUrl ? (
+          <video
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={poster}
+            src={videoUrl}
+          />
+        ) : (
+          <img
+            src={image || ""}
+            alt={name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+        )}
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
 
@@ -49,12 +74,16 @@ export const LifestyleCard: React.FC<LifestyleCardProps> = ({
                 <h3 className="text-white font-semibold text-xs leading-tight">
                   {name}
                 </h3>
-                <span className="text-white text-xs">{formatPrice(price)}</span>
+                {price != null && (
+                  <span className="text-white text-xs">
+                    {formatPrice(price)}
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Modal de opções que aparece ao clicar no botão de seta */}
+          {/* Modal de opções que aparece ao clicar no botão de seta
           {isOptionsOpen && (
             <div className="bg-white p-4 mx-2 mb-1 rounded-lg shadow-lg">
               <label
@@ -71,18 +100,20 @@ export const LifestyleCard: React.FC<LifestyleCardProps> = ({
                 <option>Preto Clássico</option>
                 <option>Vermelho Vintage</option>
               </select>
-              <div className="text-right text-xs text-black mt-2">
-                {formatPrice(price)}
-              </div>
+              {price != null && (
+                <div className="text-right text-xs text-black mt-2">
+                  {formatPrice(price)}
+                </div>
+              )}
             </div>
-          )}
+          )} */}
 
           {/* Footer com os botões */}
           <div className="flex bg-primary text-white font-medium">
-            <button className="flex-grow text-center py-3 transition-opacity hover:opacity-80 font-light">
-              Comprar Agora
+            <button className="flex-grow text-center py-3 transition-opacity hover:opacity-80 font-light" onClick={handleGotoCollection}>
+              Ver Coleção
             </button>
-            <button
+            {/* <button
               onClick={() => setOptionsOpen(!isOptionsOpen)}
               className="px-4 border-l border-white/20 transition-opacity hover:opacity-80"
             >
@@ -98,7 +129,7 @@ export const LifestyleCard: React.FC<LifestyleCardProps> = ({
                   clipRule="evenodd"
                 />
               </svg>
-            </button>
+            </button> */}
           </div>
         </div>
       </div>

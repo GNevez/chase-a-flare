@@ -21,15 +21,26 @@ import {
 interface FilterComboboxProps {
   input?: boolean;
   options: { label: string; value: string }[];
+  value?: string;
+  onChange?: (value: string) => void;
+  placeholder?: string;
 }
 
-
-export function FilterCombobox({ input = false, options }: FilterComboboxProps) {
+export function FilterCombobox({
+  input = false,
+  options,
+  value: externalValue,
+  onChange,
+  placeholder = "Ordenar por...",
+}: FilterComboboxProps) {
   const [open, setOpen] = useState(false);
-  const [value, setValue] = useState("relevance"); 
+  const [internalValue, setInternalValue] = useState("relevance");
+
+  const value = externalValue ?? internalValue;
+  const setValue = onChange ?? setInternalValue;
 
   return (
-    <Popover open={open} onOpenChange={setOpen} >
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant="outline"
@@ -39,7 +50,7 @@ export function FilterCombobox({ input = false, options }: FilterComboboxProps) 
         >
           {value
             ? options.find((option) => option.value === value)?.label
-            : "Ordenar por..."}
+            : placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>

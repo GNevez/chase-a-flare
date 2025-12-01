@@ -1,14 +1,34 @@
 // components/RelatedProducts.tsx
 import React, { useRef } from "react";
+import { ProductCard } from "@/components/collection/productCard";
 
-interface RelatedProduct {
-  name: string;
-  price: string;
-  image: string;
+interface Product {
+  id: number;
+  nome: string;
+  sku: string;
+  slug: string;
+  preco: number;
+  precoOriginal?: number;
+  isSale?: boolean;
+  isNew?: boolean;
+  imagemPrincipal: string;
+  imagemHover?: string;
+  categoriaNome: string;
+  coresDisponiveis: Array<{
+    id: number;
+    nome: string;
+    hex1?: string;
+    hex2?: string;
+    quantidadeEstoque: number;
+    imagens: Array<{
+      id: number;
+      url: string;
+    }>;
+  }>;
 }
 
 interface RelatedProductsProps {
-  products: RelatedProduct[];
+  products: Product[];
 }
 
 const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
@@ -26,22 +46,31 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
     }
   };
 
+  if (!products || products.length === 0) {
+    return null;
+  }
+
   return (
     <div className="mt-16 lg:mt-24">
-      <h2 className="text-3xl font-bold text-center mb-8 text-primary dark:text-background-light">
-        Talvez você goste
-      </h2>
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-primary mb-3">
+          Talvez você goste
+        </h2>
+        <p className="text-primary/60 text-lg">
+          Produtos selecionados especialmente para você
+        </p>
+      </div>
 
       {/* Carrossel Container */}
-      <div className="relative">
+      <div className="relative group">
         {/* Botões de navegação */}
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all duration-200"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white hover:bg-accent text-primary hover:text-white shadow-xl rounded-full p-3 transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110"
           aria-label="Scroll left"
         >
           <svg
-            className="w-6 h-6 text-primary"
+            className="w-6 h-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -49,7 +78,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M15 19l-7-7 7-7"
             />
           </svg>
@@ -57,11 +86,11 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
 
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-2 transition-all duration-200"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white hover:bg-accent text-primary hover:text-white shadow-xl rounded-full p-3 transition-all duration-300 opacity-0 group-hover:opacity-100 hover:scale-110"
           aria-label="Scroll right"
         >
           <svg
-            className="w-6 h-6 text-primary"
+            className="w-6 h-6"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -69,7 +98,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={2}
+              strokeWidth={2.5}
               d="M9 5l7 7-7 7"
             />
           </svg>
@@ -78,26 +107,12 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({ products }) => {
         {/* Carrossel */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-6 overflow-x-auto scrollbar-hide pb-4"
+          className="flex gap-6 overflow-x-auto scrollbar-hide pb-6 px-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {products.map((product, index) => (
-            <div key={index} className="flex-shrink-0 w-64 text-center">
-              <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                <img
-                  alt={product.name}
-                  className="w-full h-64 object-cover"
-                  src={product.image}
-                />
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-2 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-primary/80 font-semibold">
-                    {product.price}
-                  </p>
-                </div>
-              </div>
+          {products.map((product) => (
+            <div key={product.id} className="flex-shrink-0 w-72">
+              <ProductCard product={product} />
             </div>
           ))}
         </div>

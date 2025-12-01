@@ -1,5 +1,29 @@
 import { ProductCard } from "./productCard";
-import { Product } from "@/interface/collection/products";
+
+interface Product {
+  id: number;
+  nome: string;
+  sku: string;
+  slug: string;
+  preco: number;
+  precoOriginal?: number;
+  isSale?: boolean;
+  isNew?: boolean;
+  imagemPrincipal: string;
+  imagemHover?: string;
+  categoriaNome: string;
+  coresDisponiveis: Array<{
+    id: number;
+    nome: string;
+    hex1?: string;
+    hex2?: string;
+    quantidadeEstoque: number;
+    imagens: Array<{
+      id: number;
+      url: string;
+    }>;
+  }>;
+}
 
 export function ProductList({ products }: { products: Product[] }) {
   return (

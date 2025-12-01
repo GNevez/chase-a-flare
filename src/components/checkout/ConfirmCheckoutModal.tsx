@@ -10,6 +10,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck } from "lucide-react";
+// payment confirmation is handled by parent using existing form tokenization
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface CheckoutData {
   nome: string;
@@ -41,12 +44,15 @@ export default function ConfirmCheckoutModal({
   isLoading = false,
   checkoutData,
 }: ConfirmCheckoutModalProps) {
+  const { toast } = useToast();
+  const [localLoading, setLocalLoading] = useState(false);
+  // stripe/elements not used here anymore; parent will tokenize and confirm
   const formatPaymentMethod = (method: string) => {
     const methods: Record<string, string> = {
       pix: "PIX",
       boleto: "Boleto Bancário",
-      cartao_credito: "Cartão de Crédito",
-      cartao_debito: "Cartão de Débito",
+      cartao_de_credito: "Cartão de Crédito",
+      cartao_de_debito: "Cartão de Débito",
     };
     return methods[method] || method;
   };
@@ -145,6 +151,7 @@ export default function ConfirmCheckoutModal({
                   {formatPaymentMethod(checkoutData.metodoPagamento)}
                 </span>
               </div>
+              {/* If needed, parent handles card tokenization using existing form fields */}
             </div>
           </div>
         </div>
@@ -157,21 +164,30 @@ export default function ConfirmCheckoutModal({
           >
             Voltar
           </Button>
-          <Button
-            onClick={onConfirm}
-            disabled={isLoading}
-            className="bg-accent cursor-pointer hover:bg-accent/30 border border-accent text-primary"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Finalizando...
-              </>
-            ) : (
-              "Confirmar pedido"
-            )}
-            <ShieldCheck />
-          </Button>
+            <Button
+              onClick={async () => {
+                try {
+                  setLocalLoading(true);
+                  await onConfirm();
+                } catch (err: any) {
+                  toast({ title: "Erro no pagamento", description: err?.message || String(err), variant: "destructive" });
+                } finally {
+                  setLocalLoading(false);
+                }
+              }}
+              disabled={isLoading || localLoading}
+              className="bg-accent cursor-pointer hover:bg-accent/30 border border-accent text-primary"
+            >
+              {isLoading || localLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Finalizando...
+                </>
+              ) : (
+                "Confirmar pedido"
+              )}
+              <ShieldCheck />
+            </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

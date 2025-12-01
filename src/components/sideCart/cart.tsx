@@ -99,7 +99,9 @@ export function Cart() {
       <SheetContent
         className={
           plusJakartaSans.variable +
-          "w-full max-w-2xl bg-white dark:bg-primary shadow-2xl flex flex-col font-display p-0"
+          // on mobile (smaller than `sm`) make the sheet cover the full viewport
+          // keep desktop behavior (max width) on sm and up
+          "w-full h-full sm:h-auto sm:max-w-2xl bg-white dark:bg-primary shadow-2xl flex flex-col font-display p-0 rounded-none sm:rounded-xl"
         }
       >
         <SheetHeader className="p-6 border-b border-slate-200 dark:border-white/10 flex flex-row justify-between items-center space-y-0">
@@ -236,7 +238,7 @@ export function Cart() {
                 {cart?.itens.map((item) => (
                   <div key={item.id} className="flex items-center gap-4">
                     <div
-                      className="w-24 h-24 bg-cover bg-center rounded-xl"
+                      className="w-24 h-24 rounded-xl bg-center bg-no-repeat bg-contain sm:bg-cover"
                       style={{
                         backgroundImage: `url('${getImageURL(
                           item.produtoImagem

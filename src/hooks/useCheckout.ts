@@ -20,6 +20,10 @@ export type CheckoutPayload = {
   observacoes: string | null;
   descontoPorUnidade?: number;
   descontoCupom?: number;
+  // total calculado no frontend (inclui juros/frete/descontos) para validação no backend
+  totalEnviado?: number;
+  // número de parcelas selecionado no frontend
+  parcelasNum?: number;
 };
 
 export function useCheckout() {
