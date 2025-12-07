@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface ImageProps {
   src: string;
@@ -12,6 +12,12 @@ interface ImageGalleryProps {
 
 const ImageGallery: React.FC<ImageGalleryProps> = ({ images }) => {
   const [mainImage, setMainImage] = useState(images[0]?.src || "");
+
+  useEffect(() => {
+    if (images && images.length > 0) {
+      setMainImage(images[0].src);
+    }
+  }, [images]);
 
   // Se não houver imagens, não renderizar nada
   if (!images || images.length === 0) {

@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import { CartProvider } from "@/hooks/useCart";
 import Heartbeat from "@/components/Heartbeat";
 import { TopBar } from "@/components/TopBar";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,6 +27,21 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt_BR" className="border-border">
+      <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-E8YFKPJYB1"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-E8YFKPJYB1');
+          `}
+        </Script>
+      </head>
 
       <body
         className={cn(

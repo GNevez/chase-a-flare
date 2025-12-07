@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Head from "next/head";
 import ImageGallery from "@/components/product/ImageGallery";
 import ProductDetails from "@/components/product/ProductDetails";
 import ProductDescription from "@/components/product/ProductDescription";
@@ -26,19 +27,17 @@ const ProductPage: React.FC = () => {
     10
   );
 
-  // Resolver erro de hidratação
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Resetar seleção de cor quando produto mudar
   useEffect(() => {
     if (product) {
       setSelectedColorIndex(0);
+      document.title = `${product.nome} - Chase a Flare`;
     }
   }, [product]);
 
-  // Evitar renderização no servidor para resolver hidratação
   if (!mounted) {
     return (
       <div className="bg-white font-display text-primary pt-24">

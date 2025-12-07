@@ -38,14 +38,32 @@ type ProductCardProps = {
 export function ProductCard({ product }: ProductCardProps) {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState(false);
+  const [hoveredColorId, setHoveredColorId] = useState<number | null>(null);
   const { addItem, isLoading } = useCart();
   const { toast } = useToast();
 
-  // Usar imagemHover se disponível, senão usar imagemPrincipal
-  const currentImage =
-    isHovered && product.imagemHover
+  // Determinar qual imagem mostrar baseado na cor em hover
+  const getDisplayImage = () => {
+    if (hoveredColorId) {
+      const hoveredColor = product.coresDisponiveis.find(
+        (cor) => cor.id === hoveredColorId
+      );
+      if (hoveredColor && hoveredColor.imagens.length > 0) {
+        // Se está com hover na imagem E tem segunda imagem, mostrar a segunda
+        if (isHovered && hoveredColor.imagens.length > 1) {
+          return getImageURL(hoveredColor.imagens[1].url);
+        }
+        // Caso contrário, mostrar a primeira imagem da cor
+        return getImageURL(hoveredColor.imagens[0].url);
+      }
+    }
+    // Fallback: usar imagemHover ou imagemPrincipal
+    return isHovered && product.imagemHover
       ? getImageURL(product.imagemHover)
       : getImageURL(product.imagemPrincipal);
+  };
+
+  const currentImage = getDisplayImage();
 
   // Garantir que o preço é um número válido
   const preco = Number(product.preco) || 0;
@@ -87,10 +105,12 @@ export function ProductCard({ product }: ProductCardProps) {
     <div
       className="group cursor-pointer flex flex-col text-background-dark dark:text-background-light"
       onClick={() => router.push(`/product/${product.slug}`)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative w-full overflow-hidden rounded-lg bg-background-dark/5 dark:bg-background-light/5">
+      <div
+        className="relative w-full overflow-hidden rounded-lg bg-background-dark/5 dark:bg-background-light/5"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <div
           className="w-full bg-center bg-no-repeat aspect-square bg-cover rounded-lg transition-all duration-500 ease-in-out group-hover:scale-105"
           style={{ backgroundImage: `url("${currentImage}")` }}
@@ -154,8 +174,16 @@ export function ProductCard({ product }: ProductCardProps) {
               {product.coresDisponiveis.slice(0, 3).map((cor) => (
                 <div
                   key={cor.id}
-                  className="w-4 h-4 rounded-full border border-black/10 overflow-hidden"
+                  className="w-4 h-4 rounded-full border border-black/10 overflow-hidden cursor-pointer hover:scale-110 transition-transform"
                   title={cor.nome}
+                  onMouseEnter={(e) => {
+                    e.stopPropagation();
+                    setHoveredColorId(cor.id);
+                  }}
+                  onMouseLeave={(e) => {
+                    e.stopPropagation();
+                    setHoveredColorId(null);
+                  }}
                 >
                   {cor.hex1 && cor.hex2 ? (
                     // Duas cores - dividir ao meio
