@@ -1,13 +1,13 @@
 "use client";
 
 import { FormSection } from "@/components/checkout/FormSection";
-import { OrderSummary } from "@/components/checkout/OrderSummary";
+import { OrderSummary, FreteOpcao } from "@/components/checkout/OrderSummary";
 import { FormInput } from "@/components/checkout/FormInput";
 import { MaskedInput } from "@/components/checkout/MaskedInput";
 import { CardForm, CardFormHandle } from "@/components/checkout/CardForm";
 import { PixPayment } from "@/components/checkout/PixPayment";
 import { FormSelect } from "@/components/checkout/FormSelect";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { QrCode, CreditCard } from "lucide-react";
@@ -17,6 +17,7 @@ import { useCoupon } from "@/hooks/useCoupon";
 import { usePagarme } from "@/hooks/usePagarme";
 import { toast } from "sonner";
 import { useClienteVerification } from "@/hooks/useClienteVerification";
+import { useCorreiosFrete } from "@/hooks/useCorreiosFrete";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -76,6 +77,10 @@ export default function CheckoutPage() {
   const [atualizarCliente, setAtualizarCliente] = useState(false);
   const [pendingCheckoutData, setPendingCheckoutData] = useState<any>(null);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [freteSelecionado, setFreteSelecionado] = useState<FreteOpcao | null>(
+    null
+  );
+  const [cepCalculado, setCepCalculado] = useState<string>("");
 
   const cardFormRef = useRef<CardFormHandle>(null);
 
@@ -85,6 +90,12 @@ export default function CheckoutPage() {
     useCoupon();
   const { verificarCpf, isVerifying } = useClienteVerification();
   const { isCreatingOrder, createOrder: createPagarmeOrder } = usePagarme();
+  const {
+    calcularFrete,
+    opcoesFrete,
+    isCalculating: isCalculandoFrete,
+    limparFrete,
+  } = useCorreiosFrete();
   const [couponInput, setCouponInput] = useState("");
 
   const {
@@ -166,6 +177,41 @@ export default function CheckoutPage() {
     }
   }, [cart, isLoading]);
 
+  // Calcular frete quando CEP for preenchido
+  const handleCalcularFrete = useCallback(
+    async (cep: string) => {
+      const cepLimpo = cep.replace(/\D/g, "");
+      if (cepLimpo.length !== 8) return;
+      if (cepLimpo === cepCalculado) return; // Evita recalcular para o mesmo CEP
+
+      setCepCalculado(cepLimpo);
+      setFreteSelecionado(null);
+
+      // Peso e dimensões médias para cálculo (ajustar conforme necessário)
+      const totalItens =
+        cart?.itens.reduce((acc, it) => acc + it.quantidade, 0) ?? 1;
+      const peso = Math.max(0.3, totalItens * 0.2); // 200g por item, mínimo 300g
+
+      await calcularFrete({
+        cepDestino: cepLimpo,
+        peso,
+        altura: 10,
+        largura: 20,
+        comprimento: 30,
+        codigosServico: ["03220", "03298"], // SEDEX e PAC
+      });
+    },
+    [cart, cepCalculado, calcularFrete]
+  );
+
+  // Handler para quando seleciona uma opção de frete
+  const handleSelecionarFrete = (opcao: FreteOpcao) => {
+    setFreteSelecionado(opcao);
+  };
+
+  // Preço do frete selecionado ou valor padrão
+  const precoFrete = freteSelecionado?.preco ?? 0;
+
   if (isLoading) {
     return (
       <div className="bg-white font-display text-primary pt-24">
@@ -184,7 +230,7 @@ export default function CheckoutPage() {
 
   const subtotal = cart.subtotal;
   const itemCount = cart.totalItens;
-  const shipping = 10.0;
+  const shipping = precoFrete; // Usa o preço do frete selecionado
   const { total: totalAfterPromo, desconto: promoDiscount } = calcularTotal(
     subtotal,
     itemCount
@@ -291,7 +337,7 @@ export default function CheckoutPage() {
         cidade: pendingCheckoutData.cidade,
         estado: pendingCheckoutData.estado,
         metodoPagamento: pendingCheckoutData.metodoPagamento,
-        precoFrete: shipping,
+        precoFrete: pendingCheckoutData.precoFrete,
         totalEnviado: pendingCheckoutData.totalEnviado,
         parcelasNum: pendingCheckoutData.parcelasNum || 1,
         observacoes: null,
@@ -350,6 +396,12 @@ export default function CheckoutPage() {
 
   const handleCheckout = async (values: FormValues) => {
     try {
+      // Validar que o frete foi selecionado
+      if (!freteSelecionado) {
+        toast.error("Selecione uma opção de frete antes de continuar");
+        return;
+      }
+
       const checkoutData = {
         nome: values.name.trim(),
         email: values.email.trim(),
@@ -364,6 +416,8 @@ export default function CheckoutPage() {
         estado: values.state.trim(),
         metodoPagamento: paymentMethod,
         installmentsSelected: values.installments || null,
+        freteServico: freteSelecionado.codigoServico,
+        freteNome: freteSelecionado.nomeServico,
       };
 
       let parcelasNum = 1;
@@ -380,11 +434,13 @@ export default function CheckoutPage() {
       const subtotalComPromo = subtotalItems - promoDiscount;
       const taxaUsada = parcelasNum > 1 ? cartMaxTaxa : 0;
       const totalComJuros = subtotalComPromo * (1 + taxaUsada);
-      const totalFinal = totalComJuros + shipping - couponDiscount;
+      const totalFinal =
+        totalComJuros + freteSelecionado.preco - couponDiscount;
 
       const checkoutDataWithTotals = {
         ...checkoutData,
         parcelasNum,
+        precoFrete: freteSelecionado.preco,
         totalEnviado: Math.max(0, totalFinal),
       };
 
@@ -522,8 +578,22 @@ export default function CheckoutPage() {
                       mask="cep"
                       placeholder="00000-000"
                       name="zip"
-                      onChange={onChangeZip}
-                      onBlur={onBlurZip}
+                      onChange={(e) => {
+                        onChangeZip(e);
+                        // Calcular frete quando o CEP estiver completo
+                        const cepValue = e.target.value;
+                        if (cepValue.replace(/\D/g, "").length === 8) {
+                          handleCalcularFrete(cepValue);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        onBlurZip(e);
+                        // Também calcular no blur caso tenha 8 dígitos
+                        const cepValue = e.target.value;
+                        if (cepValue.replace(/\D/g, "").length === 8) {
+                          handleCalcularFrete(cepValue);
+                        }
+                      }}
                       ref={refZip}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                     />
@@ -687,7 +757,14 @@ export default function CheckoutPage() {
                 paymentMethod === "pix" ? null : watch("installments")
               }
               formId="checkoutForm"
-              isProcessing={isProcessingPayment || isCreatingOrder}
+              isProcessing={
+                isProcessingPayment || isCreatingOrder || !freteSelecionado
+              }
+              opcoesFrete={opcoesFrete}
+              freteSelecionado={freteSelecionado}
+              onSelecionarFrete={handleSelecionarFrete}
+              isCalculandoFrete={isCalculandoFrete}
+              cepPreenchido={cepCalculado.length === 8}
             />
           </div>
         </form>

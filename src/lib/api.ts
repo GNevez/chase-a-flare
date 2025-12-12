@@ -1,11 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 export const getBaseURL = (): string => {
-  if (process.env.NODE_ENV === "development") {
-    return process.env.NEXT_PUBLIC_API_URL_DEV || "http://localhost:5006";
-  }
-
-  return process.env.NEXT_PUBLIC_API_URL_PROD || "https://chaseaflare.com.br";
+  return process.env.NEXT_PUBLIC_API_URL!;
 };
 
 console.log("🌐 API Base URL:", getBaseURL());
