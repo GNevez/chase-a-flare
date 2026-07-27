@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import caflong from "../assets/CAFLongBranco.png";
 import Image from "next/image";
+import Link from "next/link";
 
 const Footer = () => {
   return (
@@ -98,13 +99,13 @@ const Footer = () => {
                 "Brands",
                 "Sale",
               ].map((link) => (
-                <a
+                <Link
                   key={link}
                   href="#"
                   className="block text-primary-foreground/80 hover:text-accent transition-colors text-sm"
                 >
                   {link}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -123,13 +124,13 @@ const Footer = () => {
                 "Track Order",
                 "Contact Us",
               ].map((link) => (
-                <a
+                <Link
                   key={link}
                   href="#"
                   className="block text-primary-foreground/80 hover:text-accent transition-colors text-sm"
                 >
                   {link}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
@@ -166,24 +167,24 @@ const Footer = () => {
             © 2024 Chase a Flare. All rights reserved.
           </p>
           <div className="flex space-x-6 mt-4 sm:mt-0">
-            <a
+            <Link
               href="#"
               className="text-primary-foreground/80 hover:text-accent text-sm transition-colors"
             >
               Privacy Policy
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="text-primary-foreground/80 hover:text-accent text-sm transition-colors"
             >
               Terms of Service
-            </a>
-            <a
+            </Link>
+            <Link
               href="#"
               className="text-primary-foreground/80 hover:text-accent text-sm transition-colors"
             >
               Cookies
-            </a>
+            </Link>
           </div>
         </div>
       </div>

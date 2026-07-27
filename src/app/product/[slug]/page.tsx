@@ -89,6 +89,7 @@ const ProductPage: React.FC = () => {
       }))
     : [];
 
+
   // Calcular parcelas
   const valorParcela = product.preco / product.maxParcelas;
   const installments = `${product.maxParcelas}x de R$ ${valorParcela

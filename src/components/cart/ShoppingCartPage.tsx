@@ -8,6 +8,7 @@ import { useCart } from "@/hooks/useCart";
 import { useDiscounts } from "@/hooks/useDiscounts";
 import { useCoupon } from "@/hooks/useCoupon";
 import { useEffect, useState } from "react";
+import { getBaseURL } from "@/lib/api";
 
 export function ShoppingCartPage() {
   const { cart, isLoading, updateItemQuantity, removeItem } = useCart();
@@ -163,7 +164,7 @@ export function ShoppingCartPage() {
                     name: item.produtoNome,
                     price: item.produtoPreco,
                     quantity: item.quantidade,
-                    image: `http://localhost:5006${item.produtoImagem}`,
+                    image: `${getBaseURL()}${item.produtoImagem}`,
                     color: item.corNome,
                     produtoSlug: item.produtoSlug,
                   }}

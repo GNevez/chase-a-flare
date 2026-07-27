@@ -9,6 +9,7 @@ import { CartProvider } from "@/hooks/useCart";
 import Heartbeat from "@/components/Heartbeat";
 import { TopBar } from "@/components/TopBar";
 import Script from "next/script";
+import { CartRecovery } from "@/components/CartRecovery";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -52,6 +53,7 @@ export default function RootLayout({
         <CartProvider>
           <Toaster richColors theme="light" />
           <Heartbeat />
+          <CartRecovery />
 
           <Navbar />
           <div className="">{children}</div>

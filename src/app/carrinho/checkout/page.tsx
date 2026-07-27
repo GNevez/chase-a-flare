@@ -3,6 +3,7 @@
 import { FormSection } from "@/components/checkout/FormSection";
 import { OrderSummary, FreteOpcao } from "@/components/checkout/OrderSummary";
 import { FormInput } from "@/components/checkout/FormInput";
+import { getBaseURL, apiRequest } from "@/lib/api";
 import { MaskedInput } from "@/components/checkout/MaskedInput";
 import { CardForm, CardFormHandle } from "@/components/checkout/CardForm";
 import { PixPayment } from "@/components/checkout/PixPayment";
@@ -81,6 +82,7 @@ export default function CheckoutPage() {
     null
   );
   const [cepCalculado, setCepCalculado] = useState<string>("");
+  const [emailAssociado, setEmailAssociado] = useState<string>("");
 
   const cardFormRef = useRef<CardFormHandle>(null);
 
@@ -176,6 +178,33 @@ export default function CheckoutPage() {
       window.location.href = "/carrinho";
     }
   }, [cart, isLoading]);
+
+  // Associar cliente ao carrinho quando email for preenchido
+  const handleAssociarCliente = useCallback(
+    async (email: string, nome?: string) => {
+      const emailTrimmed = email.trim().toLowerCase();
+
+      // Validar formato básico de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailTrimmed)) return;
+
+      // Evitar associar o mesmo email novamente
+      if (emailTrimmed === emailAssociado) return;
+
+      try {
+        await apiRequest.post("/api/cart/associate-client", {
+          email: emailTrimmed,
+          nome: nome || undefined,
+        });
+        setEmailAssociado(emailTrimmed);
+        console.log("[Checkout] Cliente associado ao carrinho:", emailTrimmed);
+      } catch (error) {
+        // Não exibir erro para o usuário, apenas logar
+        console.warn("[Checkout] Erro ao associar cliente ao carrinho:", error);
+      }
+    },
+    [emailAssociado]
+  );
 
   // Calcular frete quando CEP for preenchido
   const handleCalcularFrete = useCallback(
@@ -515,7 +544,15 @@ export default function CheckoutPage() {
                     name="email"
                     type="email"
                     onChange={onChangeEmail}
-                    onBlur={onBlurEmail}
+                    onBlur={(e) => {
+                      onBlurEmail(e);
+                      // Associar cliente ao carrinho quando email for preenchido
+                      const email = e.target.value;
+                      const nome = watch("name");
+                      if (email) {
+                        handleAssociarCliente(email, nome);
+                      }
+                    }}
                     ref={refEmail}
                     containerClassName="col-span-2"
                   />
@@ -743,7 +780,7 @@ export default function CheckoutPage() {
                 name: item.produtoNome,
                 quantity: item.quantidade,
                 price: item.produtoPreco,
-                image: `http://localhost:5006${item.produtoImagem}`,
+                image: `${getBaseURL()}${item.produtoImagem}`,
                 maxParcelas: (item as any).produtoMaxParcelas,
                 taxaJuros: (item as any).produtoTaxaJuros,
               }))}

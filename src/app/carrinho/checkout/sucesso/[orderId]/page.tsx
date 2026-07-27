@@ -4,39 +4,40 @@ import { useRouter, useParams } from 'next/navigation';
 import { useOrder } from '@/hooks/useOrder';
 import { CheckCircle2, Mail, Download, Package, MapPin, CreditCard, Calendar, Home } from 'lucide-react';
 import Image from 'next/image';
+import { getBaseURL } from "@/lib/api";
 
 export default function SucessoPage() {
   const router = useRouter();
   const params = useParams();
   const orderId = params.orderId as string;
-  
+
   const { order, loading, error } = useOrder({ orderId });
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
   const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(new Date(dateString));
   };
 
   const getPaymentMethodLabel = (method: string) => {
     const methods: Record<string, string> = {
-      'cartao_de_credito': 'Cartão de Crédito',
-      'cartao_de_debito': 'Cartão de Débito',
-      'pix': 'PIX',
-      'boleto': 'Boleto',
-      'dinheiro': 'Dinheiro',
-      'venda': 'Venda',
+      cartao_de_credito: "Cartão de Crédito",
+      cartao_de_debito: "Cartão de Débito",
+      pix: "PIX",
+      boleto: "Boleto",
+      dinheiro: "Dinheiro",
+      venda: "Venda",
     };
     return methods[method] || method;
   };
@@ -57,20 +58,32 @@ export default function SucessoPage() {
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center space-y-6 border border-primary/20">
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </div>
-          
+
           <div>
             <h1 className="text-2xl font-bold text-primary mb-2">
               Ops! Algo deu errado
             </h1>
-            <p className="text-primary/70">{error || 'Pedido não encontrado'}</p>
+            <p className="text-primary/70">
+              {error || "Pedido não encontrado"}
+            </p>
           </div>
 
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push("/")}
             className="w-full bg-accent text-primary py-3 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-all shadow-md hover:shadow-lg"
           >
             Voltar para Home
@@ -89,7 +102,10 @@ export default function SucessoPage() {
             <div className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center mx-auto border-2 border-accent/30">
               <CheckCircle2 className="w-10 h-10 text-accent" />
             </div>
-            <div className="absolute -inset-2 bg-accent/5 rounded-full animate-pulse" style={{ animationDuration: '2s' }} />
+            <div
+              className="absolute -inset-2 bg-accent/5 rounded-full animate-pulse"
+              style={{ animationDuration: "2s" }}
+            />
           </div>
 
           <div className="space-y-2">
@@ -144,9 +160,7 @@ export default function SucessoPage() {
             <div className="w-10 h-10 bg-accent/20 rounded-lg flex items-center justify-center border border-accent/30">
               <Package className="w-5 h-5 text-accent" />
             </div>
-            <h2 className="text-2xl font-bold text-primary">
-              Itens do Pedido
-            </h2>
+            <h2 className="text-2xl font-bold text-primary">Itens do Pedido</h2>
           </div>
 
           <div className="space-y-4">
@@ -158,7 +172,11 @@ export default function SucessoPage() {
                 <div className="relative w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden border border-primary/20">
                   {item.produtoImagem ? (
                     <Image
-                      src={item.produtoImagem.startsWith('http') ? item.produtoImagem : `http://localhost:5006${item.produtoImagem}`}
+                      src={
+                        item.produtoImagem.startsWith("http")
+                          ? item.produtoImagem
+                          : `${getBaseURL()}${item.produtoImagem}`
+                      }
                       alt={item.produtoNome}
                       fill
                       className="object-cover"
@@ -176,7 +194,9 @@ export default function SucessoPage() {
                     {item.produtoNome}
                   </h3>
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-sm text-primary/70">Cor: {item.corNome}</span>
+                    <span className="text-sm text-primary/70">
+                      Cor: {item.corNome}
+                    </span>
                     {(item.corHex1 || item.corHex2) && (
                       <div className="flex items-center gap-1">
                         {item.corHex1 && item.corHex2 ? (
@@ -242,7 +262,10 @@ export default function SucessoPage() {
                 <span>Subtotal</span>
                 <span>
                   {formatCurrency(
-                    order.itens.reduce((sum, item) => sum + item.precoTotalItem, 0)
+                    order.itens.reduce(
+                      (sum, item) => sum + item.precoTotalItem,
+                      0
+                    )
                   )}
                 </span>
               </div>
@@ -266,7 +289,7 @@ export default function SucessoPage() {
                   <span>Frete</span>
                   <span>
                     {order.precoFrete === 0
-                      ? 'GRÁTIS'
+                      ? "GRÁTIS"
                       : formatCurrency(order.precoFrete)}
                   </span>
                 </div>
@@ -314,13 +337,17 @@ export default function SucessoPage() {
                 <p className="text-sm">{order.clienteTelefone}</p>
               )}
               <div className="pt-2">
-                <p>{order.enderecoEntrega.logradouro}, {order.enderecoEntrega.numero}</p>
+                <p>
+                  {order.enderecoEntrega.logradouro},{" "}
+                  {order.enderecoEntrega.numero}
+                </p>
                 {order.enderecoEntrega.complemento && (
                   <p>{order.enderecoEntrega.complemento}</p>
                 )}
                 <p>{order.enderecoEntrega.bairro}</p>
                 <p>
-                  {order.enderecoEntrega.cidade} - {order.enderecoEntrega.estado}
+                  {order.enderecoEntrega.cidade} -{" "}
+                  {order.enderecoEntrega.estado}
                 </p>
                 <p className="mt-2 font-mono text-sm">
                   CEP: {order.enderecoEntrega.cep}
@@ -334,7 +361,11 @@ export default function SucessoPage() {
         <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 border border-primary/20">
           <div className="flex flex-col md:flex-row gap-4">
             <button
-              onClick={() => alert('Funcionalidade de download da NF será implementada em breve')}
+              onClick={() =>
+                alert(
+                  "Funcionalidade de download da NF será implementada em breve"
+                )
+              }
               className="flex-1 flex items-center justify-center space-x-2 bg-accent text-primary py-4 px-6 rounded-lg font-semibold hover:bg-accent/90 transition-all shadow-md hover:shadow-lg"
             >
               <Download className="w-5 h-5" />
@@ -342,7 +373,7 @@ export default function SucessoPage() {
             </button>
 
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push("/")}
               className="flex-1 flex items-center justify-center space-x-2 bg-white text-primary py-4 px-6 rounded-lg font-semibold hover:bg-accent/5 transition-all border-2 border-primary/20"
             >
               <Home className="w-5 h-5" />

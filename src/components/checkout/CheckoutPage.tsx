@@ -21,6 +21,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ConfirmClientModal from "./ConfirmClientModal";
 import ConfirmCheckoutModal from "./ConfirmCheckoutModal";
 import { CardForm } from "./CardForm";
+import { getBaseURL } from "@/lib/api";
 
 interface ClienteExistente {
   id: number;
@@ -690,7 +691,7 @@ export function CheckoutPage() {
                 name: item.produtoNome,
                 quantity: item.quantidade,
                 price: item.produtoPreco,
-                image: `http://localhost:5006${item.produtoImagem}`,
+                image: `${getBaseURL()}${item.produtoImagem}`,
                 // incluir informações de parcelamento/juros trazidas do backend
                 maxParcelas:
                   (item as any).produtoMaxParcelas ??

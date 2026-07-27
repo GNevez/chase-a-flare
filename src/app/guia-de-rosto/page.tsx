@@ -4,6 +4,7 @@ import ovalImg from "@/assets/rosto/oval.png";
 import quadradoImg from "@/assets/rosto/quadrado.png";
 import redondoImg from "@/assets/rosto/redondo.png";
 import triangularImg from "@/assets/rosto/triangular.png";
+import Link from "next/link";
 
 export const metadata = {
   title: "Guia de Formato de Rosto | Chase a Flare",
@@ -192,13 +193,13 @@ export default function GuiaDeRostoPage() {
             </p>
 
             <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
-                href="/produtos"
-                className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-8 py-3 font-medium text-white transition-all hover:bg-gray-800"
+              <Link
+                href="/products"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-8 py-3 font-medium text-white transition-all hover:bg-primary/90"
               >
                 <Glasses className="h-5 w-5" />
                 <span>Ver Produtos</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
